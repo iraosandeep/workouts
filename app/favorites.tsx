@@ -87,7 +87,13 @@ export default function Favorites() {
               paddingTop: 80,
             }}
           >
-            <Text style={{ color: "#141414", textAlign: "center" }}>
+            <Text
+              style={{
+                color: "#141414",
+                textAlign: "center",
+                paddingHorizontal: 20,
+              }}
+            >
               {search
                 ? `No results for "${search}"`
                 : "No favorites yet — tap the heart on any exercise to save it here."}
