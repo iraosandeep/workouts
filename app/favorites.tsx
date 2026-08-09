@@ -1,5 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
 import {
   FlatList,
   Pressable,
@@ -10,18 +8,15 @@ import {
 } from "react-native";
 
 import { ExerciseCard } from "@/components/exercise-card";
-import { fetchExercises } from "@/lib/videos";
 import { GradientBackground } from "@/components/bg";
+import { useFavorites } from "@/lib/favorites";
 import { useExercise } from "@/hooks/useExercise";
 
-export default function Index() {
-  const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["exercises"],
-    queryFn: fetchExercises,
-  });
+export default function Favorites() {
+  const favorites = useFavorites();
 
   const { activeCategory, categories, filtered, search, setSearch } =
-    useExercise({ data: data ?? [] });
+    useExercise({ data: favorites ?? [] });
 
   return (
     <GradientBackground>
@@ -31,10 +26,6 @@ export default function Index() {
         keyExtractor={(item) => item.name}
         numColumns={1}
         contentContainerStyle={{ paddingTop: 16, padding: 0, gap: 0 }}
-        initialNumToRender={4}
-        maxToRenderPerBatch={4}
-        windowSize={3}
-        removeClippedSubviews
         ListHeaderComponent={
           <View>
             <TextInput
@@ -91,18 +82,18 @@ export default function Index() {
           </View>
         }
         ListEmptyComponent={
-          <View style={{ paddingTop: 40, alignItems: "center" }}>
-            <Text style={{ color: "#141414" }}>
-              {isLoading
-                ? "Loading exercises…"
-                : isError
-                  ? "Couldn't load exercises. Pull to retry."
-                  : `No results for "${search}"`}
+          <View
+            style={{
+              paddingTop: 80,
+            }}
+          >
+            <Text style={{ color: "#141414", textAlign: "center" }}>
+              {search
+                ? `No results for "${search}"`
+                : "No favorites yet — tap the heart on any exercise to save it here."}
             </Text>
           </View>
         }
-        onRefresh={refetch}
-        refreshing={isLoading}
         renderItem={({ item }) => <ExerciseCard exercise={item} />}
       />
     </GradientBackground>
