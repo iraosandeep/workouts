@@ -27,6 +27,7 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
         overflow: "hidden",
         backgroundColor: "#89aef0",
         boxShadow: "0 1px 4px rgba(0, 0, 0, 0.08)",
+        borderRadius: 12,
       })}
     >
       <View style={{ height: 220, backgroundColor: "#e9e9eb" }}>

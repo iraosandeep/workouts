@@ -49,7 +49,7 @@ export default function Index() {
         data={filtered}
         keyExtractor={(item) => item.name}
         numColumns={1}
-        contentContainerStyle={{ paddingTop: 16, padding: 6, gap: 4 }}
+        contentContainerStyle={{ paddingTop: 16, padding: 6, gap: 12 }}
         initialNumToRender={4}
         maxToRenderPerBatch={4}
         windowSize={3}
@@ -57,6 +57,7 @@ export default function Index() {
         ListHeaderComponent={
           <View>
             <TextInput
+              clearButtonMode="always"
               value={search}
               onChangeText={setSearch}
               placeholder='Search exercises… e.g. "dumbbell row" or "chest"'
@@ -70,6 +71,7 @@ export default function Index() {
                 fontSize: 16,
                 color: "white",
                 marginBottom: 12,
+                borderRadius: 99,
               }}
             />
             <ScrollView
