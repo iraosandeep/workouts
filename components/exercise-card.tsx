@@ -23,9 +23,9 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
   return (
     <Pressable
       onPress={handlePlayPause}
-      style={({ pressed }) => ({
-        borderRadius: 20,
+      style={() => ({
         overflow: "hidden",
+        backgroundColor: "#89aef0",
         boxShadow: "0 1px 4px rgba(0, 0, 0, 0.08)",
       })}
     >
@@ -47,13 +47,13 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
           <View
             style={{
               alignSelf: "flex-start",
-              backgroundColor: "rgba(255,255,255,0.9)",
+              backgroundColor: "#89aef0",
               borderRadius: 99,
               paddingHorizontal: 10,
               paddingVertical: 4,
             }}
           >
-            <Text style={{ fontSize: 12, fontWeight: "600", color: "#1c1c1e" }}>
+            <Text style={{ fontSize: 12, fontWeight: "600", color: "#055bf0" }}>
               {exercise.category}
             </Text>
           </View>
@@ -74,17 +74,17 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
               width: 48,
               height: 48,
               borderRadius: 24,
-              backgroundColor: "rgba(255,255,255,0.9)",
+              backgroundColor: "#89aef0",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
             <SymbolView
               name={isPlaying ? "pause.fill" : "play.fill"}
-              tintColor="#1c1c1e"
+              tintColor="#055bf0"
               size={20}
               fallback={
-                <Text style={{ fontSize: 18, color: "#1c1c1e" }}>▶</Text>
+                <Text style={{ fontSize: 18, color: "#055bf0" }}>▶</Text>
               }
             />
           </View>
@@ -92,7 +92,7 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
       </View>
       <View style={{ padding: 14 }}>
         <Text
-          style={{ fontSize: 15, fontWeight: "600", color: "white" }}
+          style={{ fontSize: 15, fontWeight: "600", color: "#055bf0" }}
           selectable
         >
           {exercise.title}
