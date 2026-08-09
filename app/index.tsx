@@ -61,7 +61,7 @@ export default function Index() {
               value={search}
               onChangeText={setSearch}
               placeholder='Search exercises… e.g. "dumbbell row" or "chest"'
-              placeholderTextColor="#8e8e93"
+              placeholderTextColor="#cacae8"
               autoCapitalize="none"
               autoCorrect={false}
               style={{
