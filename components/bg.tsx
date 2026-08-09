@@ -8,7 +8,7 @@ export function GradientBackground({
 }: PropsWithChildren<{ style?: StyleProp<ViewStyle> }>) {
   return (
     <LinearGradient
-      colors={["#1B7CF3", "#1660E0", "#0A3FAE"]}
+      colors={["#faf7f7", "#807e7e", "#141414"]}
       start={{ x: 0.2, y: 0 }}
       end={{ x: 0.8, y: 1 }}
       style={[{ flex: 1 }, style]}

@@ -25,9 +25,9 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
       onPress={handlePlayPause}
       style={() => ({
         overflow: "hidden",
-        backgroundColor: "#89aef0",
+        backgroundColor: "#141414",
         boxShadow: "0 1px 4px rgba(0, 0, 0, 0.08)",
-        borderRadius: 12,
+        // borderRadius: 12,
       })}
     >
       <View style={{ height: 220, backgroundColor: "#e9e9eb" }}>
@@ -48,13 +48,13 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
           <View
             style={{
               alignSelf: "flex-start",
-              backgroundColor: "#89aef0",
-              borderRadius: 99,
+              backgroundColor: "#141414",
+              // borderRadius: 99,
               paddingHorizontal: 10,
               paddingVertical: 4,
             }}
           >
-            <Text style={{ fontSize: 12, fontWeight: "600", color: "#055bf0" }}>
+            <Text style={{ fontSize: 12, fontWeight: "600", color: "#faf7f7" }}>
               {exercise.category}
             </Text>
           </View>
@@ -62,9 +62,9 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
         <View
           style={{
             position: "absolute",
-            top: "-60%",
+            top: "-70%",
             bottom: 0,
-            left: "80%",
+            left: "85%",
             right: 0,
             alignItems: "center",
             justifyContent: "center",
@@ -74,15 +74,13 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
             style={{
               width: 48,
               height: 48,
-              borderRadius: 24,
-              backgroundColor: "#89aef0",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
             <SymbolView
               name={isPlaying ? "pause.fill" : "play.fill"}
-              tintColor="#055bf0"
+              tintColor="#141414"
               size={20}
               fallback={
                 <Text style={{ fontSize: 18, color: "#055bf0" }}>▶</Text>
@@ -91,9 +89,9 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
           </View>
         </View>
       </View>
-      <View style={{ padding: 14 }}>
+      <View style={{ padding: 20 }}>
         <Text
-          style={{ fontSize: 15, fontWeight: "600", color: "#055bf0" }}
+          style={{ fontSize: 16, fontWeight: "600", color: "#faf7f7" }}
           selectable
         >
           {exercise.title}

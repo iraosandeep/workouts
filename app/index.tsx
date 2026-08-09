@@ -49,7 +49,7 @@ export default function Index() {
         data={filtered}
         keyExtractor={(item) => item.name}
         numColumns={1}
-        contentContainerStyle={{ paddingTop: 16, padding: 6, gap: 12 }}
+        contentContainerStyle={{ paddingTop: 16, padding: 0, gap: 0 }}
         initialNumToRender={4}
         maxToRenderPerBatch={4}
         windowSize={3}
@@ -61,17 +61,18 @@ export default function Index() {
               value={search}
               onChangeText={setSearch}
               placeholder='Search exercises… e.g. "dumbbell row" or "chest"'
-              placeholderTextColor="#cacae8"
+              placeholderTextColor="#faf7f7"
               autoCapitalize="none"
               autoCorrect={false}
               style={{
-                backgroundColor: "#055bf0",
+                backgroundColor: "#141414",
                 paddingHorizontal: 16,
                 paddingVertical: 12,
                 fontSize: 16,
                 color: "white",
                 marginBottom: 12,
-                borderRadius: 99,
+                // marginHorizontal: 4,
+                // borderRadius: 99,
               }}
             />
             <ScrollView
@@ -90,8 +91,8 @@ export default function Index() {
                     key={category}
                     onPress={() => setSearch(isActive ? "" : category)}
                     style={{
-                      backgroundColor: isActive ? "#055bf0" : "#e9e9eb",
-                      borderRadius: 99,
+                      backgroundColor: isActive ? "#141414" : "#e9e9eb",
+                      // borderRadius: 99,
                       paddingHorizontal: 14,
                       paddingVertical: 8,
                     }}
@@ -113,7 +114,7 @@ export default function Index() {
         }
         ListEmptyComponent={
           <View style={{ paddingTop: 40, alignItems: "center" }}>
-            <Text style={{ color: "#8e8e93" }}>
+            <Text style={{ color: "#141414" }}>
               {isLoading
                 ? "Loading exercises…"
                 : isError
