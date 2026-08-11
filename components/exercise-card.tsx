@@ -1,6 +1,6 @@
 import { SymbolView } from "expo-symbols";
 import { useVideoPlayer, VideoView } from "expo-video";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import type { Exercise } from "@/lib/videos";
 import { useEffect, useState } from "react";
 import { isFavorite, toggleFavorite, useFavorites } from "@/lib/favorites";
@@ -12,6 +12,8 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
+import { Button } from "./button";
+import { Tag } from "./tag";
 
 export function ExerciseCard({ exercise }: { exercise: Exercise }) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -134,13 +136,7 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
               gap: 8,
             }}
           >
-            <View
-              style={{
-                backgroundColor: "#141414",
-                paddingHorizontal: 8,
-                paddingVertical: 8,
-              }}
-            >
+            <Button>
               <SymbolView
                 name={isPlaying ? "pause.fill" : "play.fill"}
                 tintColor="#faf7f7"
@@ -149,15 +145,8 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
                   <Text style={{ fontSize: 14, color: "#faf7f7" }}>▶</Text>
                 }
               />
-            </View>
-            <Pressable
-              onPress={() => toggleFavorite(exercise)}
-              style={{
-                backgroundColor: "#141414",
-                paddingHorizontal: 8,
-                paddingVertical: 8,
-              }}
-            >
+            </Button>
+            <Button onPress={() => toggleFavorite(exercise)}>
               <Animated.View style={badgeStyle}>
                 <SymbolView
                   name={favorited ? "heart.fill" : "heart"}
@@ -170,7 +159,7 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
                   }
                 />
               </Animated.View>
-            </Pressable>
+            </Button>
           </View>
         </View>
         <View
@@ -196,18 +185,7 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
           >
             {exercise.title}
           </Text>
-          <View
-            style={{
-              alignSelf: "flex-start",
-              backgroundColor: "#faf7f7",
-              paddingHorizontal: 10,
-              paddingVertical: 4,
-            }}
-          >
-            <Text style={{ fontSize: 12, fontWeight: "600", color: "#141414" }}>
-              {exercise.category}
-            </Text>
-          </View>
+          <Tag>{exercise.category}</Tag>
         </View>
       </View>
     </GestureDetector>

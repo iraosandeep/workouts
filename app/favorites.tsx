@@ -1,16 +1,11 @@
-import {
-  FlatList,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { FlatList, ScrollView, Text, View } from "react-native";
 
 import { ExerciseCard } from "@/components/exercise-card";
 import { GradientBackground } from "@/components/bg";
 import { useFavorites } from "@/lib/favorites";
 import { useExercise } from "@/hooks/useExercise";
+import { Chip } from "@/components/chip";
+import { Input } from "@/components/input";
 
 export default function Favorites() {
   const favorites = useFavorites();
@@ -28,22 +23,13 @@ export default function Favorites() {
         contentContainerStyle={{ paddingTop: 16, padding: 0, gap: 0 }}
         ListHeaderComponent={
           <View>
-            <TextInput
+            <Input
               clearButtonMode="always"
               value={search}
               onChangeText={setSearch}
               placeholder='Search exercises… e.g. "dumbbell row" or "chest"'
-              placeholderTextColor="#faf7f7"
               autoCapitalize="none"
               autoCorrect={false}
-              style={{
-                backgroundColor: "#141414",
-                paddingHorizontal: 16,
-                paddingVertical: 12,
-                fontSize: 16,
-                color: "white",
-                marginBottom: 12,
-              }}
             />
             <ScrollView
               horizontal
@@ -57,25 +43,13 @@ export default function Favorites() {
               {categories.map((category) => {
                 const isActive = category === activeCategory;
                 return (
-                  <Pressable
+                  <Chip
                     key={category}
+                    isActive={isActive}
                     onPress={() => setSearch(isActive ? "" : category)}
-                    style={{
-                      backgroundColor: isActive ? "#141414" : "#e9e9eb",
-                      paddingHorizontal: 14,
-                      paddingVertical: 8,
-                    }}
                   >
-                    <Text
-                      style={{
-                        fontSize: 13,
-                        fontWeight: "600",
-                        color: isActive ? "white" : "#1c1c1e",
-                      }}
-                    >
-                      {category}
-                    </Text>
-                  </Pressable>
+                    {category}
+                  </Chip>
                 );
               })}
             </ScrollView>
