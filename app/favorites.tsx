@@ -6,9 +6,10 @@ import { useFavorites } from "@/lib/favorites";
 import { useExercise } from "@/hooks/useExercise";
 import { Chip } from "@/components/chip";
 import { Input } from "@/components/input";
-import { colors } from "@/lib/theme";
+import { useTheme } from "@/lib/theme";
 
 export default function Favorites() {
+  const theme = useTheme();
   const favorites = useFavorites();
 
   const { activeCategory, categories, filtered, search, setSearch } =
@@ -64,7 +65,7 @@ export default function Favorites() {
           >
             <Text
               style={{
-                color: colors.dark,
+                color: theme.text,
                 textAlign: "center",
                 paddingHorizontal: 20,
               }}

@@ -1,17 +1,18 @@
 import { Pressable, Text } from "react-native";
 
-import { colors } from "@/lib/theme";
+import { useTheme } from "@/lib/theme";
 
 type ChipProps = {
   isActive: boolean;
 } & React.ComponentProps<typeof Pressable>;
 
 export const Chip = ({ isActive, ...props }: ChipProps) => {
+  const theme = useTheme();
   return (
     <Pressable
       {...props}
       style={{
-        backgroundColor: isActive ? colors.dark : colors.surface,
+        backgroundColor: isActive ? theme.accent : theme.surface,
         paddingHorizontal: 14,
         paddingVertical: 8,
       }}
@@ -21,7 +22,7 @@ export const Chip = ({ isActive, ...props }: ChipProps) => {
         <Text
           style={{
             fontWeight: "600",
-            color: isActive ? colors.light : colors.dark,
+            color: isActive ? theme.onAccent : theme.onSurface,
           }}
         >
           {props.children}

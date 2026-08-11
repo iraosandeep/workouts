@@ -14,9 +14,10 @@ import Animated, {
 } from "react-native-reanimated";
 import { Button } from "./button";
 import { Tag } from "./tag";
-import { colors } from "@/lib/theme";
+import { useTheme } from "@/lib/theme";
 
 export function ExerciseCard({ exercise }: { exercise: Exercise }) {
+  const theme = useTheme();
   const [isPlaying, setIsPlaying] = useState(false);
   const favorites = useFavorites();
   const favorited = isFavorite(favorites, exercise.name);
@@ -45,6 +46,8 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
   }));
 
   const handlePlayPause = () => {
+    if (player.status !== "readyToPlay") return;
+
     if (!player.playing) {
       player.play();
       setIsPlaying(true);
@@ -90,11 +93,11 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
       <View
         style={{
           overflow: "hidden",
-          backgroundColor: colors.dark,
+          backgroundColor: theme.accent,
           boxShadow: "0 1px 4px rgba(0, 0, 0, 0.08)",
         }}
       >
-        <View style={{ height: 220, backgroundColor: colors.surface }}>
+        <View style={{ height: 220, backgroundColor: theme.surface }}>
           <VideoView
             player={player}
             style={{ flex: 1 }}
@@ -119,10 +122,10 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
           >
             <SymbolView
               name="heart.fill"
-              tintColor={colors.light}
+              tintColor={theme.onAccent}
               size={72}
               fallback={
-                <Text style={{ fontSize: 64, color: colors.light }}>♥</Text>
+                <Text style={{ fontSize: 64, color: theme.onAccent }}>♥</Text>
               }
             />
           </Animated.View>
@@ -140,10 +143,10 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
             <Button>
               <SymbolView
                 name={isPlaying ? "pause.fill" : "play.fill"}
-                tintColor={colors.light}
+                tintColor={theme.onAccent}
                 size={16}
                 fallback={
-                  <Text style={{ fontSize: 14, color: colors.light }}>▶</Text>
+                  <Text style={{ fontSize: 14, color: theme.onAccent }}>▶</Text>
                 }
               />
             </Button>
@@ -151,10 +154,10 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
               <Animated.View style={badgeStyle}>
                 <SymbolView
                   name={favorited ? "heart.fill" : "heart"}
-                  tintColor={colors.light}
+                  tintColor={theme.onAccent}
                   size={16}
                   fallback={
-                    <Text style={{ fontSize: 14, color: colors.light }}>
+                    <Text style={{ fontSize: 14, color: theme.onAccent }}>
                       {favorited ? "♥" : "♡"}
                     </Text>
                   }
@@ -178,7 +181,7 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
             style={{
               fontSize: 14,
               fontWeight: "600",
-              color: colors.light,
+              color: theme.onAccent,
               width: "75%",
             }}
             selectable
