@@ -14,6 +14,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { Button } from "./button";
 import { Tag } from "./tag";
+import { colors } from "@/lib/theme";
 
 export function ExerciseCard({ exercise }: { exercise: Exercise }) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -89,11 +90,11 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
       <View
         style={{
           overflow: "hidden",
-          backgroundColor: "#141414",
+          backgroundColor: colors.dark,
           boxShadow: "0 1px 4px rgba(0, 0, 0, 0.08)",
         }}
       >
-        <View style={{ height: 220, backgroundColor: "#e9e9eb" }}>
+        <View style={{ height: 220, backgroundColor: colors.surface }}>
           <VideoView
             player={player}
             style={{ flex: 1 }}
@@ -118,10 +119,10 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
           >
             <SymbolView
               name="heart.fill"
-              tintColor="#faf7f7"
+              tintColor={colors.light}
               size={72}
               fallback={
-                <Text style={{ fontSize: 64, color: "#faf7f7" }}>♥</Text>
+                <Text style={{ fontSize: 64, color: colors.light }}>♥</Text>
               }
             />
           </Animated.View>
@@ -139,10 +140,10 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
             <Button>
               <SymbolView
                 name={isPlaying ? "pause.fill" : "play.fill"}
-                tintColor="#faf7f7"
+                tintColor={colors.light}
                 size={16}
                 fallback={
-                  <Text style={{ fontSize: 14, color: "#faf7f7" }}>▶</Text>
+                  <Text style={{ fontSize: 14, color: colors.light }}>▶</Text>
                 }
               />
             </Button>
@@ -150,10 +151,10 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
               <Animated.View style={badgeStyle}>
                 <SymbolView
                   name={favorited ? "heart.fill" : "heart"}
-                  tintColor="#faf7f7"
+                  tintColor={colors.light}
                   size={16}
                   fallback={
-                    <Text style={{ fontSize: 14, color: "#faf7f7" }}>
+                    <Text style={{ fontSize: 14, color: colors.light }}>
                       {favorited ? "♥" : "♡"}
                     </Text>
                   }
@@ -177,7 +178,7 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
             style={{
               fontSize: 14,
               fontWeight: "600",
-              color: "#faf7f7",
+              color: colors.light,
               width: "75%",
             }}
             selectable

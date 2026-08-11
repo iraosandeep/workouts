@@ -1,18 +1,20 @@
 import { TextInput } from "react-native";
 
+import { colors } from "@/lib/theme";
+
 type InputProps = React.ComponentProps<typeof TextInput>;
 
 export const Input = ({ ...props }: InputProps) => {
   return (
     <TextInput
       {...props}
-      placeholderTextColor="#faf7f7"
+      placeholderTextColor={colors.muted}
       style={{
-        backgroundColor: "#141414",
+        backgroundColor: colors.dark,
         paddingHorizontal: 16,
         paddingVertical: 12,
         fontSize: 16,
-        color: "white",
+        color: colors.light,
         marginBottom: 12,
       }}
     />

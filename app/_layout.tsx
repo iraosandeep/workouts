@@ -2,6 +2,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
+import { colors } from "@/lib/theme";
+
 const ONE_WEEK = 1000 * 60 * 60 * 24 * 7; // 7 days
 
 const queryClient = new QueryClient({
@@ -18,7 +20,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView>
       <QueryClientProvider client={queryClient}>
-        <NativeTabs tintColor="#141414">
+        <NativeTabs tintColor={colors.dark}>
           <NativeTabs.Trigger name="index">
             <Icon sf="list.bullet" />
             <Label>Exercises</Label>

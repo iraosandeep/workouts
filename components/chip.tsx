@@ -1,5 +1,7 @@
 import { Pressable, Text } from "react-native";
 
+import { colors } from "@/lib/theme";
+
 type ChipProps = {
   isActive: boolean;
 } & React.ComponentProps<typeof Pressable>;
@@ -9,7 +11,7 @@ export const Chip = ({ isActive, ...props }: ChipProps) => {
     <Pressable
       {...props}
       style={{
-        backgroundColor: isActive ? "#141414" : "#e9e9eb",
+        backgroundColor: isActive ? colors.dark : colors.surface,
         paddingHorizontal: 14,
         paddingVertical: 8,
       }}
@@ -17,7 +19,10 @@ export const Chip = ({ isActive, ...props }: ChipProps) => {
       {typeof props.children === "number" ||
       typeof props.children === "string" ? (
         <Text
-          style={{ fontWeight: "600", color: isActive ? "white" : "#1c1c1e" }}
+          style={{
+            fontWeight: "600",
+            color: isActive ? colors.light : colors.dark,
+          }}
         >
           {props.children}
         </Text>

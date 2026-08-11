@@ -7,6 +7,7 @@ import { GradientBackground } from "@/components/bg";
 import { useExercise } from "@/hooks/useExercise";
 import { Chip } from "@/components/chip";
 import { Input } from "@/components/input";
+import { colors } from "@/lib/theme";
 
 export default function Index() {
   const { data, isLoading, isError, refetch } = useQuery({
@@ -65,7 +66,7 @@ export default function Index() {
         }
         ListEmptyComponent={
           <View style={{ paddingTop: 40, alignItems: "center" }}>
-            <Text style={{ color: "#141414" }}>
+            <Text style={{ color: colors.dark }}>
               {isLoading
                 ? "Loading exercises…"
                 : isError
