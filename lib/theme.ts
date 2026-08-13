@@ -3,12 +3,24 @@ import { useColorScheme } from "react-native";
 // The only 4 colors used anywhere in this app. Light/dark themes are built
 // by reassigning these same values to different roles — never introduce a
 // new color here, only remap these.
-const palette = {
-  light: "#faf7f7",
-  dark: "#141414",
-  muted: "#807e7e",
-  surface: "#e9e9eb",
+
+export const themescolors = {
+  neutral: {
+    light: "#fafafa",
+    dark: "#171717",
+    muted: "#737373",
+    surface: "#e5e5e5",
+  },
+
+  dark_premium: {
+    light: "#f4f4f5",
+    dark: "#18181b",
+    muted: "#71717a",
+    surface: "#e4e4e7",
+  },
 } as const;
+
+const palette = themescolors.dark_premium;
 
 type Theme = {
   /** 3-stop gradient used by GradientBackground. */
