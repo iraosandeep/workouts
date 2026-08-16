@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import {
   Accordion,
@@ -7,15 +6,14 @@ import {
   Chip,
   useThemeColor,
 } from "heroui-native";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import Animated from "react-native-reanimated";
 
 import { WorkoutChecklist } from "@/components/workout-checklist";
-import { getAllExercises } from "@/lib/exercises";
-import { buildMockWeekWorkouts } from "@/lib/mock-workouts";
+import { WorkoutPickerSheet } from "@/components/workout-picker-sheet";
 import { formatWeekDayDate, getCurrentWeekDays, toDateKey } from "@/lib/week";
-import { getWorkout, setWorkout, useWorkouts } from "@/lib/workouts";
+import { getWorkout, useWorkouts } from "@/lib/workouts";
 
 export default function Week() {
   const weekDays = useMemo(() => getCurrentWeekDays(), []);
@@ -23,24 +21,10 @@ export default function Week() {
     weekDays.find((weekDay) => weekDay.isToday)?.day ?? weekDays[0].day;
 
   const [expandedDay, setExpandedDay] = useState<string | undefined>(todayDay);
+  const [pickerDateKey, setPickerDateKey] = useState<string | undefined>();
 
   const workouts = useWorkouts();
-  const catalog = useMemo(() => getAllExercises(), []);
   const accentForeground = useThemeColor("accent-foreground");
-
-  const hasSeededMockData = useRef(false);
-  useEffect(() => {
-    if (hasSeededMockData.current || catalog.length === 0) return;
-    hasSeededMockData.current = true;
-
-    const mockWorkouts = buildMockWeekWorkouts(catalog, weekDays);
-    weekDays.forEach((weekDay) => {
-      const dateKey = toDateKey(weekDay.date);
-      if (getWorkout(workouts, dateKey).length === 0) {
-        setWorkout(dateKey, mockWorkouts[dateKey]);
-      }
-    });
-  }, [catalog, weekDays, workouts]);
 
   return (
     <View className="flex-1 bg-background">
@@ -87,15 +71,7 @@ export default function Week() {
                   {hasWorkout ? (
                     <WorkoutChecklist dateKey={dateKey} exercises={exercises} />
                   ) : null}
-                  <Button
-                    size="sm"
-                    onPress={() =>
-                      router.push({
-                        pathname: "/picker",
-                        params: { date: dateKey },
-                      })
-                    }
-                  >
+                  <Button size="sm" onPress={() => setPickerDateKey(dateKey)}>
                     <SymbolView
                       name={hasWorkout ? "pencil" : "plus"}
                       tintColor={accentForeground}
@@ -116,6 +92,10 @@ export default function Week() {
           })}
         </Accordion>
       </Animated.ScrollView>
+      <WorkoutPickerSheet
+        dateKey={pickerDateKey}
+        onClose={() => setPickerDateKey(undefined)}
+      />
     </View>
   );
 }

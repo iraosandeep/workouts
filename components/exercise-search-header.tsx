@@ -21,7 +21,7 @@ export function ExerciseSearchHeader({
   placeholder,
 }: ExerciseSearchHeaderProps) {
   return (
-    <View className="gap-3 px-4 pb-2">
+    <View className="gap-3 pb-2">
       <SearchField value={search} onChange={onSearchChange}>
         <SearchField.Group>
           <SearchField.SearchIcon />

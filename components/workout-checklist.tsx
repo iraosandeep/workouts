@@ -1,5 +1,4 @@
-import { SymbolView } from "expo-symbols";
-import { Checkbox, useThemeColor } from "heroui-native";
+import { Checkbox } from "heroui-native";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 

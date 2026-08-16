@@ -1,17 +1,22 @@
-import { Button, Input, Label, Tabs, TextField } from "heroui-native";
+import { Button, Input, Label, Tabs, TextField, useToast } from "heroui-native";
 import { useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Alert, ScrollView, Text, View } from "react-native";
 
 import {
   DIFFICULTIES,
   TRAINING_GOALS,
+  getAllExercises,
   humanize,
   type Difficulty,
   type TrainingGoal,
 } from "@/lib/exercises";
+import { buildMockWeekWorkouts } from "@/lib/mock-workouts";
 import { setProfile, useProfile } from "@/lib/profile";
+import { getCurrentWeekDays, toDateKey } from "@/lib/week";
+import { setWorkout } from "@/lib/workouts";
 
 export default function Profile() {
+  const { toast } = useToast();
   const profile = useProfile();
   const [name, setName] = useState(profile.name ?? "");
   const [weightKg, setWeightKg] = useState(profile.weightKg?.toString() ?? "");
@@ -31,6 +36,60 @@ export default function Profile() {
       primaryGoal,
       experienceLevel,
     });
+    toast.show({ variant: "success", label: "Profile saved" });
+  };
+
+  const handleSeedPlan = () => {
+    Alert.alert(
+      "Seed prebuilt plan?",
+      "This replaces this week's workouts with the built-in push/pull/legs plan.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Seed",
+          onPress: () => {
+            const weekDays = getCurrentWeekDays();
+            const mockWorkouts = buildMockWeekWorkouts(
+              getAllExercises(),
+              weekDays,
+            );
+            weekDays.forEach((weekDay) => {
+              const dateKey = toDateKey(weekDay.date);
+              setWorkout(dateKey, mockWorkouts[dateKey] ?? []);
+            });
+            toast.show({
+              variant: "success",
+              label: "Prebuilt plan seeded",
+              description: "This week's workouts have been updated.",
+            });
+          },
+        },
+      ],
+    );
+  };
+
+  const handleClearPlan = () => {
+    Alert.alert(
+      "Clear this week's plan?",
+      "This removes every workout planned for this week. This can't be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Clear",
+          style: "destructive",
+          onPress: () => {
+            getCurrentWeekDays().forEach((weekDay) => {
+              setWorkout(toDateKey(weekDay.date), []);
+            });
+            toast.show({
+              variant: "default",
+              label: "Plan cleared",
+              description: "This week's workouts were removed.",
+            });
+          },
+        },
+      ],
+    );
   };
 
   return (
@@ -109,6 +168,20 @@ export default function Profile() {
         </View>
 
         <Button onPress={handleSave}>Save</Button>
+
+        <View className="gap-2">
+          <Text className="font-semibold text-foreground">
+            This Week&apos;s Plan
+          </Text>
+          <View className="flex flex-row gap-2 justify-between items-center">
+            <Button variant="secondary" onPress={handleSeedPlan}>
+              Prebuilt Plan
+            </Button>
+            <Button variant="danger-soft" onPress={handleClearPlan}>
+              Clear Plan
+            </Button>
+          </View>
+        </View>
       </ScrollView>
     </View>
   );

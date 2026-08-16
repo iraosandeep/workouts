@@ -7,6 +7,10 @@ import "../global.css";
 
 const ONE_WEEK = 1000 * 60 * 60 * 24 * 7; // 7 days
 
+export const unstable_settings = {
+  anchor: "(dashboard)",
+};
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -32,8 +36,8 @@ export default function RootLayout() {
 function AppTabs() {
   const accent = useThemeColor("accent");
   return (
-    <NativeTabs tintColor={accent}>
-      <NativeTabs.Trigger name="(home)">
+    <NativeTabs tintColor={accent} labelVisibilityMode="unlabeled">
+      <NativeTabs.Trigger name="(dashboard)">
         <Icon sf="house.fill" />
         <Label>Home</Label>
       </NativeTabs.Trigger>

@@ -26,13 +26,15 @@ export default function Exercises() {
         windowSize={3}
         removeClippedSubviews
         ListHeaderComponent={
-          <ExerciseSearchHeader
-            search={search}
-            onSearchChange={setSearch}
-            categories={categories}
-            activeCategory={activeCategory}
-            placeholder='Search exercises… e.g. "kettlebell" or "hamstrings"'
-          />
+          <View className="px-4">
+            <ExerciseSearchHeader
+              search={search}
+              onSearchChange={setSearch}
+              categories={categories}
+              activeCategory={activeCategory}
+              placeholder='Search exercises… e.g. "kettlebell" or "hamstrings"'
+            />
+          </View>
         }
         ListEmptyComponent={
           <EmptyState

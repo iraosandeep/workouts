@@ -32,18 +32,18 @@ export function MonthProgress() {
     [monthDays, workouts, sessions],
   );
 
-  const plannedDays = days.filter((day) => day.isPlanned && !day.isFuture);
-  const completedDays = plannedDays.filter((day) => day.isComplete);
-  const percent =
-    plannedDays.length > 0
-      ? Math.round((completedDays.length / plannedDays.length) * 100)
-      : 0;
+  // const plannedDays = days.filter((day) => day.isPlanned && !day.isFuture);
+  // const completedDays = plannedDays.filter((day) => day.isComplete);
+  // const percent =
+  //   plannedDays.length > 0
+  //     ? Math.round((completedDays.length / plannedDays.length) * 100)
+  //     : 0;
 
   return (
     <View className="gap-3 bg-surface p-4">
       <View className="flex-row items-center justify-between">
         <Text className="text-lg font-bold text-foreground">{MONTH_NAME}</Text>
-        <Text className="text-lg font-bold text-foreground">{percent}%</Text>
+        {/*<Text className="text-lg font-bold text-foreground">{percent}%</Text>*/}
       </View>
       <View className="flex-row flex-wrap gap-2">
         {days.map((day) => (

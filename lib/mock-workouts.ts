@@ -31,7 +31,7 @@ const WORKOUTS: Record<
   pull: {
     exercises: [
       "machine-neutral-row",
-      "machine-lat-pulldown",
+      "machine-pulldown",
       "machine-face-pulls",
       "dumbbell-curl",
     ],
@@ -43,7 +43,7 @@ const WORKOUTS: Record<
       "machine-leg-press",
       "dumbbell-bulgarian-split-squat",
       "machine-leg-extension",
-      "machine-leg-curl",
+      "dumbbell-leg-curl",
     ],
     count: 4,
   },
@@ -63,7 +63,7 @@ const WORKOUTS: Record<
       "machine-leg-press",
       "dumbbell-alternating-forward-lunge",
       "machine-45-degree-back-extension",
-      "machine-leg-curl",
+      "dumbbell-leg-curl",
     ],
     count: 4,
   },
