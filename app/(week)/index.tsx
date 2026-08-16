@@ -57,28 +57,22 @@ export default function Week() {
                 value={weekDay.day}
                 className={dayColorClassName}
               >
-                <Accordion.Trigger className="px-5 py-6">
-                  <View className="flex-1 gap-1">
-                    <View className="flex-row items-center gap-2">
-                      <Text className="text-5xl font-extrabold uppercase tracking-wide text-foreground">
-                        {weekDay.day}
-                      </Text>
-                      {weekDay.isToday ? (
-                        <Chip size="sm" variant="soft" color="accent">
-                          Today
-                        </Chip>
-                      ) : null}
-                    </View>
-                    {weekDay.isToday && (
-                      <Text className="text-sm text-muted">
-                        {formatWeekDayDate(weekDay.date)}
-                      </Text>
-                    )}
-                  </View>
+                <Accordion.Trigger className="py-7">
+                  <Text className="text-5xl font-extrabold uppercase tracking-wide text-foreground">
+                    {weekDay.day}
+                  </Text>
                 </Accordion.Trigger>
                 <Accordion.Content className="gap-3 pb-5">
                   {hasWorkout ? (
-                    <WorkoutChecklist dateKey={dateKey} exercises={exercises} />
+                    <>
+                      <Text className="text-sm text-muted">
+                        {formatWeekDayDate(weekDay.date)}
+                      </Text>
+                      <WorkoutChecklist
+                        dateKey={dateKey}
+                        exercises={exercises}
+                      />
+                    </>
                   ) : null}
                   <Button size="sm" onPress={() => setPickerDateKey(dateKey)}>
                     <SymbolView

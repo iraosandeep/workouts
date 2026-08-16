@@ -29,10 +29,10 @@ export default function Home() {
               className={`gap-2 p-1`}
             >
               <Text className="text-4xl font-extrabold uppercase tracking-wide text-foreground">
-                {today.day}
+                Today
               </Text>
               <Text className="text-sm text-muted">
-                {formatWeekDayDate(today.date)}
+                {today.day} {formatWeekDayDate(today.date)}
               </Text>
               <Text className="text-foreground" numberOfLines={2}>
                 {summary}
