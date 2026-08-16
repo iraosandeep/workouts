@@ -1,0 +1,21 @@
+@import "tailwindcss";
+@import "uniwind";
+
+@import "heroui-native/styles";
+
+/* Path to the heroui-native lib inside node_modules relative to global.css */
+/* Examples:
+ *   - If global.css is at project root: ./node_modules/heroui-native/lib
+ *   - If global.css is in app/: ../node_modules/heroui-native/lib
+ *   - If global.css is in src/styles/: ../../node_modules/heroui-native/lib
+ */
+/* Not required starting from heroui-native 1.0.8 — the library registers its own source */
+@source './node_modules/heroui-native/lib';
+
+/* App-wide sharp-corners style: every heroui radius token (--radius-xs..4xl,
+ * --radius-field) derives from these two base variables, as do our own
+ * `rounded-*` classNames — override once here instead of per component. */
+@theme {
+  --radius: 0px;
+  --field-radius: 0px;
+}

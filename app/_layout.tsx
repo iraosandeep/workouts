@@ -1,8 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
+import { HeroUINativeProvider, useThemeColor } from "heroui-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import { useTheme } from "@/lib/theme";
+import "../global.css";
 
 const ONE_WEEK = 1000 * 60 * 60 * 24 * 7; // 7 days
 
@@ -17,21 +18,37 @@ const queryClient = new QueryClient({
 });
 
 export default function RootLayout() {
-  const theme = useTheme();
   return (
     <GestureHandlerRootView>
-      <QueryClientProvider client={queryClient}>
-        <NativeTabs tintColor={theme.accent}>
-          <NativeTabs.Trigger name="index">
-            <Icon sf="list.bullet" />
-            <Label>Exercises</Label>
-          </NativeTabs.Trigger>
-          <NativeTabs.Trigger name="favorites" role="favorites">
-            <Icon sf={{ default: "heart", selected: "heart.fill" }} />
-            <Label>Favorites</Label>
-          </NativeTabs.Trigger>
-        </NativeTabs>
-      </QueryClientProvider>
+      <HeroUINativeProvider>
+        <QueryClientProvider client={queryClient}>
+          <AppTabs />
+        </QueryClientProvider>
+      </HeroUINativeProvider>
     </GestureHandlerRootView>
+  );
+}
+
+function AppTabs() {
+  const accent = useThemeColor("accent");
+  return (
+    <NativeTabs tintColor={accent}>
+      <NativeTabs.Trigger name="(home)">
+        <Icon sf="house.fill" />
+        <Label>Home</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="(week)">
+        <Icon sf="calendar" />
+        <Label>Week</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="(exercises)">
+        <Icon sf="list.bullet" />
+        <Label>Exercises</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="(profile)">
+        <Icon sf="person.fill" />
+        <Label>Profile</Label>
+      </NativeTabs.Trigger>
+    </NativeTabs>
   );
 }

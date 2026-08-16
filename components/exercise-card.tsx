@@ -1,49 +1,21 @@
 import { SymbolView } from "expo-symbols";
 import { useVideoPlayer, VideoView } from "expo-video";
+import { Button, useThemeColor } from "heroui-native";
+import { useState } from "react";
 import { Text, View } from "react-native";
-import type { Exercise } from "@/lib/videos";
-import { useEffect, useState } from "react";
-import { isFavorite, toggleFavorite, useFavorites } from "@/lib/favorites";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSequence,
-  withSpring,
-  withTiming,
-} from "react-native-reanimated";
-import { Button } from "./button";
-import { Tag } from "./tag";
-import { useTheme } from "@/lib/theme";
+
+import { ExerciseDetails } from "@/components/exercise-details";
+import { humanize, type Exercise } from "@/lib/exercises";
 
 export function ExerciseCard({ exercise }: { exercise: Exercise }) {
-  const theme = useTheme();
   const [isPlaying, setIsPlaying] = useState(false);
-  const favorites = useFavorites();
-  const favorited = isFavorite(favorites, exercise.name);
-  const player = useVideoPlayer(exercise.url, (player) => {
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const iconColor = useThemeColor("accent-soft-foreground");
+  const backgroundColor = useThemeColor("background");
+  const player = useVideoPlayer(exercise.video?.url ?? null, (player) => {
     player.loop = true;
   });
-
-  const heartPopScale = useSharedValue(0);
-  const heartPopOpacity = useSharedValue(0);
-  const badgeScale = useSharedValue(1);
-
-  useEffect(() => {
-    badgeScale.value = withSequence(
-      withSpring(1.35, { damping: 6, stiffness: 260 }),
-      withSpring(1, { damping: 8 }),
-    );
-  }, [favorited, badgeScale]);
-
-  const heartPopStyle = useAnimatedStyle(() => ({
-    opacity: heartPopOpacity.value,
-    transform: [{ scale: heartPopScale.value }],
-  }));
-
-  const badgeStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: badgeScale.value }],
-  }));
 
   const handlePlayPause = () => {
     if (player.status !== "readyToPlay") return;
@@ -57,20 +29,6 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
     }
   };
 
-  const handleLike = () => {
-    toggleFavorite(exercise);
-    heartPopScale.value = 0;
-    heartPopOpacity.value = 1;
-    heartPopScale.value = withSequence(
-      withSpring(1.15, { damping: 9, stiffness: 500 }),
-      withSpring(1, { damping: 10 }),
-    );
-    heartPopOpacity.value = withSequence(
-      withTiming(1, { duration: 300 }),
-      withTiming(0, { duration: 500 }, () => {}),
-    );
-  };
-
   const singleTap = Gesture.Tap()
     .maxDuration(250)
     .runOnJS(true)
@@ -78,26 +36,15 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
       if (success) handlePlayPause();
     });
 
-  const doubleTap = Gesture.Tap()
-    .numberOfTaps(2)
-    .maxDelay(250)
-    .runOnJS(true)
-    .onEnd((_event, success) => {
-      if (success) handleLike();
-    });
-
-  const composedGesture = Gesture.Exclusive(doubleTap, singleTap);
+  const composedGesture = Gesture.Exclusive(singleTap);
 
   return (
-    <GestureDetector gesture={composedGesture}>
-      <View
-        style={{
-          overflow: "hidden",
-          backgroundColor: theme.accent,
-          boxShadow: "0 1px 4px rgba(0, 0, 0, 0.08)",
-        }}
-      >
-        <View style={{ height: 220, backgroundColor: theme.surface }}>
+    <View
+      className="overflow-hidden rounded-3xl bg-surface"
+      style={{ boxShadow: "0 1px 4px rgba(0, 0, 0, 0.08)" }}
+    >
+      <GestureDetector gesture={composedGesture}>
+        <View className="h-55 bg-surface-secondary">
           <VideoView
             player={player}
             style={{ flex: 1 }}
@@ -105,93 +52,52 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
             nativeControls={false}
             pointerEvents="none"
           />
-          <Animated.View
-            style={[
-              {
-                position: "absolute",
-                top: 0,
-                bottom: 0,
-                left: 0,
-                right: 0,
-                alignItems: "center",
-                justifyContent: "center",
-              },
-              heartPopStyle,
-            ]}
-            pointerEvents="none"
-          >
-            <SymbolView
-              name="heart.fill"
-              tintColor={theme.onAccent}
-              size={72}
-              fallback={
-                <Text style={{ fontSize: 64, color: theme.onAccent }}>♥</Text>
-              }
-            />
-          </Animated.View>
-          <View
-            style={{
-              position: "absolute",
-              top: 12,
-              right: 12,
-              display: "flex",
-              alignItems: "center",
-              flexDirection: "row",
-              gap: 8,
-            }}
-          >
-            <Button>
+          <View className="absolute right-3 top-3 flex-row items-center gap-2">
+            <Button isIconOnly size="sm" variant="secondary">
               <SymbolView
                 name={isPlaying ? "pause.fill" : "play.fill"}
-                tintColor={theme.onAccent}
+                tintColor={iconColor}
                 size={16}
-                fallback={
-                  <Text style={{ fontSize: 14, color: theme.onAccent }}>▶</Text>
-                }
+                fallback={<Text style={{ fontSize: 14 }}>▶</Text>}
               />
-            </Button>
-            <Button onPress={() => toggleFavorite(exercise)}>
-              <Animated.View style={badgeStyle}>
-                <SymbolView
-                  name={favorited ? "heart.fill" : "heart"}
-                  tintColor={theme.onAccent}
-                  size={16}
-                  fallback={
-                    <Text style={{ fontSize: 14, color: theme.onAccent }}>
-                      {favorited ? "♥" : "♡"}
-                    </Text>
-                  }
-                />
-              </Animated.View>
             </Button>
           </View>
         </View>
-        <View
-          style={{
-            padding: 14,
-            paddingHorizontal: 8,
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 4,
-          }}
+      </GestureDetector>
+      <View className="flex-row items-center justify-between gap-2 bg-foreground px-4 py-4">
+        <Text
+          className="flex-1 text-[15px] font-bold text-background"
+          numberOfLines={1}
+          selectable
         >
-          <Text
-            style={{
-              fontSize: 14,
-              fontWeight: "600",
-              color: theme.onAccent,
-              width: "75%",
-            }}
-            selectable
-            numberOfLines={1}
+          {exercise.name}
+        </Text>
+        <View className="flex-row items-center gap-2">
+          <View className="bg-background px-2 py-1">
+            <Text className="text-xs font-bold text-foreground">
+              {humanize(exercise.category)}
+            </Text>
+          </View>
+          <Button
+            isIconOnly
+            size="sm"
+            variant="ghost"
+            onPress={() => setIsDetailsOpen((current) => !current)}
           >
-            {exercise.title}
-          </Text>
-          <Tag>{exercise.category}</Tag>
+            <SymbolView
+              name={isDetailsOpen ? "chevron.up" : "info.circle"}
+              tintColor={backgroundColor}
+              size={16}
+              fallback={
+                <Text style={{ color: backgroundColor }}>
+                  {isDetailsOpen ? "▲" : "ⓘ"}
+                </Text>
+              }
+            />
+          </Button>
         </View>
       </View>
-    </GestureDetector>
+      {isDetailsOpen ? <ExerciseDetails exercise={exercise} /> : null}
+    </View>
   );
 }
