@@ -201,6 +201,29 @@ export function getExerciseById(id: string): Exercise | undefined {
   return exercises.find((exercise) => exercise.id === id);
 }
 
+/** Case-insensitive substring match across the fields a user is likely to
+ * search by — shared by the Exercises directory filter and the chat agent's
+ * exercise lookup tool so the two stay in sync. */
+export function matchesExerciseQuery(exercise: Exercise, query: string): boolean {
+  const normalizedQuery = query.trim().toLowerCase();
+  if (!normalizedQuery) return true;
+
+  return (
+    exercise.name.toLowerCase().includes(normalizedQuery) ||
+    exercise.category.toLowerCase().includes(normalizedQuery) ||
+    exercise.equipment.some((equipment) =>
+      equipment.toLowerCase().includes(normalizedQuery),
+    ) ||
+    exercise.primary_muscles.some((muscle) =>
+      muscle.toLowerCase().includes(normalizedQuery),
+    ) ||
+    exercise.body_parts.some((bodyPart) =>
+      bodyPart.toLowerCase().includes(normalizedQuery),
+    ) ||
+    exercise.tags.some((tag) => tag.toLowerCase().includes(normalizedQuery))
+  );
+}
+
 /** "pectoralis_major" -> "Pectoralis Major" */
 export function humanize(value: string): string {
   return value

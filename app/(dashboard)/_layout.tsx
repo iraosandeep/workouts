@@ -11,6 +11,12 @@ export default function HomeLayout() {
         }}
       />
       <Stack.Screen
+        name="calendar"
+        options={{
+          presentation: "pageSheet",
+        }}
+      />
+      <Stack.Screen
         name="workout-session"
         options={{
           presentation: "fullScreenModal",

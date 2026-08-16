@@ -43,6 +43,26 @@ export function setWorkout(dateKey: string, exercises: Exercise[]) {
   write({ ...cache, [dateKey]: exercises });
 }
 
+export function addExerciseToWorkout(dateKey: string, exercise: Exercise) {
+  const current = getWorkout(cache, dateKey);
+  if (current.some((existing) => existing.id === exercise.id)) return;
+  setWorkout(dateKey, [...current, exercise]);
+}
+
+export function removeExerciseFromWorkout(dateKey: string, exerciseId: string) {
+  const current = getWorkout(cache, dateKey);
+  setWorkout(
+    dateKey,
+    current.filter((exercise) => exercise.id !== exerciseId),
+  );
+}
+
+/** Reads the current snapshot directly — for callers outside a React render
+ * (e.g. the chat agent's tools), where `useWorkouts()` isn't available. */
+export function getWorkoutForDate(dateKey: string): Exercise[] {
+  return getWorkout(cache, dateKey);
+}
+
 export function useWorkouts() {
   return useSyncExternalStore(subscribe, getSnapshot);
 }

@@ -61,6 +61,37 @@ export function getCurrentMonthDays(
   });
 }
 
+export type CalendarDay = {
+  date: Date;
+  isCurrentMonth: boolean;
+  isToday: boolean;
+};
+
+/** Monday-first calendar grid for the month containing `referenceDate`,
+ * padded with the trailing days of the previous month and leading days of
+ * the next so every row is a full week (matches a standard calendar app). */
+export function getMonthGridDays(
+  referenceDate: Date = new Date(),
+): CalendarDay[] {
+  const year = referenceDate.getFullYear();
+  const month = referenceDate.getMonth();
+  const firstOfMonth = new Date(year, month, 1);
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const leadingCount = (firstOfMonth.getDay() + 6) % 7; // Monday = 0
+  const totalCells = Math.ceil((leadingCount + daysInMonth) / 7) * 7;
+  const today = new Date();
+
+  return Array.from({ length: totalCells }, (_, i) => {
+    const date = new Date(year, month, i - leadingCount + 1);
+    return {
+      date,
+      isCurrentMonth: date.getMonth() === month,
+      isToday: isSameDay(date, today),
+    };
+  });
+}
+
 /** Stable per-day storage key, e.g. "2026-08-16". */
 export function toDateKey(date: Date): string {
   const year = date.getFullYear();

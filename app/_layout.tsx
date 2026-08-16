@@ -53,6 +53,10 @@ function AppTabs() {
         <Icon sf="person.fill" />
         <Label>Profile</Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="(chat)">
+        <Icon sf="bubble.left.and.bubble.right.fill" />
+        <Label>Chat</Label>
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }

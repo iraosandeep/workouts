@@ -1,5 +1,6 @@
+import { router } from "expo-router";
 import { useMemo } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 import { getDayCompletion, useSessions } from "@/lib/sessions";
 import { getCurrentMonthDays, toDateKey } from "@/lib/week";
@@ -40,7 +41,10 @@ export function MonthProgress() {
   //     : 0;
 
   return (
-    <View className="gap-3 bg-surface p-4">
+    <Pressable
+      onPress={() => router.push("/calendar")}
+      className="gap-3 bg-surface p-4"
+    >
       <View className="flex-row items-center justify-between">
         <Text className="text-lg font-bold text-foreground">{MONTH_NAME}</Text>
         {/*<Text className="text-lg font-bold text-foreground">{percent}%</Text>*/}
@@ -57,6 +61,6 @@ export function MonthProgress() {
           />
         ))}
       </View>
-    </View>
+    </Pressable>
   );
 }

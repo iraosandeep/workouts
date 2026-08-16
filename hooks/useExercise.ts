@@ -1,6 +1,11 @@
 import { useMemo, useState } from "react";
 
-import type { BodyPart, Difficulty, Exercise } from "@/lib/exercises";
+import {
+  matchesExerciseQuery,
+  type BodyPart,
+  type Difficulty,
+  type Exercise,
+} from "@/lib/exercises";
 
 export const ALL_CATEGORIES = "All";
 
@@ -29,23 +34,9 @@ export const useExercise = ({ data }: { data: Exercise[] }) => {
 
   const filtered = useMemo(() => {
     if (!data) return [];
-    const query = search.trim().toLowerCase();
 
     return data.filter((exercise) => {
-      const matchesQuery =
-        !query ||
-        exercise.name.toLowerCase().includes(query) ||
-        exercise.category.toLowerCase().includes(query) ||
-        exercise.equipment.some((equipment) =>
-          equipment.toLowerCase().includes(query),
-        ) ||
-        exercise.primary_muscles.some((muscle) =>
-          muscle.toLowerCase().includes(query),
-        ) ||
-        exercise.body_parts.some((bodyPart) =>
-          bodyPart.toLowerCase().includes(query),
-        ) ||
-        exercise.tags.some((tag) => tag.toLowerCase().includes(query));
+      const matchesQuery = matchesExerciseQuery(exercise, search);
 
       const matchesBodyParts =
         selectedBodyParts.size === 0 ||
