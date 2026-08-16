@@ -19,3 +19,44 @@
   --radius: 0px;
   --field-radius: 0px;
 }
+
+/* Per-weekday panel shades for the Week screen — one per day. Mirrors heroui's own
+ * variables.css/theme.css split exactly: raw values per @variant light/dark here,
+ * then a separate `@theme inline` block below aliases them into real Tailwind
+ * color tokens (bg-day-1..7 etc). Uniwind requires every theme to declare the
+ * same set of variables, so both variants must be explicit — a bare `@theme`
+ * block for light plus a dark-only override (the previous version of this file)
+ * is not enough and fails with "Theme light is missing variable ...". */
+@layer theme {
+  :root {
+    @variant light {
+      --day-1: #d7d7d7;
+      --day-2: #cecece;
+      --day-3: #c9c9c9;
+      --day-4: #c0c0c0;
+      --day-5: #acacac;
+      --day-6: #a3a1a2;
+      --day-7: #949293;
+    }
+
+    @variant dark {
+      --day-1: #707070;
+      --day-2: #616161;
+      --day-3: #535353;
+      --day-4: #424242;
+      --day-5: #3a3a3a;
+      --day-6: #333333;
+      --day-7: #2c2c2c;
+    }
+  }
+}
+
+@theme inline static {
+  --color-day-1: var(--day-1);
+  --color-day-2: var(--day-2);
+  --color-day-3: var(--day-3);
+  --color-day-4: var(--day-4);
+  --color-day-5: var(--day-5);
+  --color-day-6: var(--day-6);
+  --color-day-7: var(--day-7);
+}

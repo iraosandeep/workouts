@@ -23,7 +23,9 @@ function isSameDay(a: Date, b: Date): boolean {
 }
 
 /** Monday-to-Sunday days of the week containing `referenceDate`. */
-export function getCurrentWeekDays(referenceDate: Date = new Date()): WeekDay[] {
+export function getCurrentWeekDays(
+  referenceDate: Date = new Date(),
+): WeekDay[] {
   const startOfWeek = new Date(referenceDate);
   const daysSinceMonday = (startOfWeek.getDay() + 6) % 7;
   startOfWeek.setDate(startOfWeek.getDate() - daysSinceMonday);
@@ -73,4 +75,26 @@ export function formatWeekDayDate(date: Date): string {
     day: "numeric",
     year: "numeric",
   });
+}
+
+// Literal class names (not template-literal-constructed) so uniwind's static
+// scanner can find and generate them — a `bg-day-${n}` template literal would
+// never be picked up at build time.
+const DAY_BACKGROUND_CLASSNAMES = [
+  "bg-day-1",
+  "bg-day-2",
+  "bg-day-3",
+  "bg-day-4",
+  "bg-day-5",
+  "bg-day-6",
+  "bg-day-7",
+] as const;
+
+/** The Week screen's panel color for the day at Monday=0..Sunday=6. */
+export function getDayColorClassName(
+  mondayIndexedWeekdayIndex: number,
+): string {
+  return DAY_BACKGROUND_CLASSNAMES[
+    mondayIndexedWeekdayIndex % DAY_BACKGROUND_CLASSNAMES.length
+  ];
 }

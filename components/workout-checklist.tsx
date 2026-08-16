@@ -33,14 +33,14 @@ export function WorkoutChecklist({
         const isExpanded = expandedId === exercise.id;
 
         return (
-          <View key={exercise.id} className="overflow-hidden bg-surface">
-            <View className="flex-row items-center pl-3">
+          <View key={exercise.id} className="overflow-hidden">
+            <View className="flex-row items-center">
               <Checkbox
                 isSelected={isCompleted}
                 onSelectedChange={() =>
                   toggleExerciseCompleted(dateKey, exercise.id)
                 }
-                className="border-2 border-surface-foreground"
+                className="bg-transparent border border-surface-foreground"
               />
               <Pressable
                 onPress={() =>

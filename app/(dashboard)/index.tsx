@@ -1,55 +1,47 @@
-import { Button } from "heroui-native";
-import { useState } from "react";
-import { ScrollView, Text, View } from "react-native";
-
 import { MonthProgress } from "@/components/month-progress";
-import { WorkoutChecklist } from "@/components/workout-checklist";
-import { WorkoutPickerSheet } from "@/components/workout-picker-sheet";
-import { toDateKey } from "@/lib/week";
+import { formatWeekDayDate, getCurrentWeekDays, toDateKey } from "@/lib/week";
 import { getWorkout, useWorkouts } from "@/lib/workouts";
+import { router } from "expo-router";
+import { useMemo } from "react";
+import { Pressable, ScrollView, Text, View } from "react-native";
 
 export default function Home() {
   const todayKey = toDateKey(new Date());
   const workouts = useWorkouts();
-  const exercises = getWorkout(workouts, todayKey);
+  const weekDays = useMemo(() => getCurrentWeekDays(), []);
+  const todayIndex = weekDays.findIndex((weekDay) => weekDay.isToday);
+  const today = weekDays[todayIndex] ?? weekDays[0];
+  const exercises = getWorkout(workouts, today ? todayKey : "");
   const hasWorkout = exercises.length > 0;
-
-  const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const summary = hasWorkout
+    ? `${exercises.length} exercise${exercises.length === 1 ? "" : "s"}: ${exercises
+        .map((exercise) => exercise.name)
+        .join(", ")}`
+    : "No workout planned yet — tap to add one.";
 
   return (
-    <View className="flex-1 bg-background">
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={{ padding: 16, gap: 16 }}
-      >
-        <View className="gap-3">
-          <Text className="text-2xl font-bold uppercase tracking-wide text-foreground">
-            Today
-          </Text>
-          {hasWorkout ? (
-            <WorkoutChecklist dateKey={todayKey} exercises={exercises} />
-          ) : (
-            <View className="gap-3 bg-surface p-4">
-              <Text className="text-foreground">
-                No workout planned for today.
+    <View className="flex-1 gap-3 p-4 bg-background">
+      <ScrollView contentInsetAdjustmentBehavior="automatic">
+        <View className="flex gap-3">
+          <View className="flex-1 bg-surface p-4">
+            <Pressable
+              onPress={() => router.push("/today")}
+              className={`gap-2 p-1`}
+            >
+              <Text className="text-4xl font-extrabold uppercase tracking-wide text-foreground">
+                {today.day}
               </Text>
-              <Button
-                size="sm"
-                className="self-start"
-                onPress={() => setIsPickerOpen(true)}
-              >
-                Plan Today&apos;s Workout
-              </Button>
-            </View>
-          )}
+              <Text className="text-sm text-muted">
+                {formatWeekDayDate(today.date)}
+              </Text>
+              <Text className="text-foreground" numberOfLines={2}>
+                {summary}
+              </Text>
+            </Pressable>
+          </View>
+          <MonthProgress />
         </View>
-
-        <MonthProgress />
       </ScrollView>
-      <WorkoutPickerSheet
-        dateKey={isPickerOpen ? todayKey : undefined}
-        onClose={() => setIsPickerOpen(false)}
-      />
     </View>
   );
 }

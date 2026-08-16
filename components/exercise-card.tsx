@@ -1,6 +1,6 @@
 import { SymbolView } from "expo-symbols";
 import { useVideoPlayer, VideoView } from "expo-video";
-import { Button, useThemeColor } from "heroui-native";
+import { Accordion, Button, useThemeColor } from "heroui-native";
 import { useState } from "react";
 import { Text, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -10,7 +10,6 @@ import { humanize, type Exercise } from "@/lib/exercises";
 
 export function ExerciseCard({ exercise }: { exercise: Exercise }) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const iconColor = useThemeColor("accent-soft-foreground");
   const backgroundColor = useThemeColor("background");
   const player = useVideoPlayer(exercise.video?.url ?? null, (player) => {
@@ -64,40 +63,28 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
           </View>
         </View>
       </GestureDetector>
-      <View className="flex-row items-center justify-between gap-2 bg-foreground px-4 py-4">
-        <Text
-          className="flex-1 text-[15px] font-bold text-background"
-          numberOfLines={1}
-          selectable
-        >
-          {exercise.name}
-        </Text>
-        <View className="flex-row items-center gap-2">
-          <View className="bg-background px-2 py-1">
-            <Text className="text-xs font-bold text-foreground">
-              {humanize(exercise.category)}
+      <Accordion>
+        <Accordion.Item value="details">
+          <Accordion.Trigger className="bg-foreground px-4 py-4">
+            <Text
+              className="flex-1 text-[15px] font-bold text-background"
+              numberOfLines={1}
+              selectable
+            >
+              {exercise.name}
             </Text>
-          </View>
-          <Button
-            isIconOnly
-            size="sm"
-            variant="ghost"
-            onPress={() => setIsDetailsOpen((current) => !current)}
-          >
-            <SymbolView
-              name={isDetailsOpen ? "chevron.up" : "info.circle"}
-              tintColor={backgroundColor}
-              size={16}
-              fallback={
-                <Text style={{ color: backgroundColor }}>
-                  {isDetailsOpen ? "▲" : "ⓘ"}
-                </Text>
-              }
-            />
-          </Button>
-        </View>
-      </View>
-      {isDetailsOpen ? <ExerciseDetails exercise={exercise} /> : null}
+            <View className="bg-background px-2 py-1">
+              <Text className="text-xs font-bold text-foreground">
+                {humanize(exercise.category)}
+              </Text>
+            </View>
+            <Accordion.Indicator iconProps={{ color: backgroundColor }} />
+          </Accordion.Trigger>
+          <Accordion.Content>
+            <ExerciseDetails exercise={exercise} />
+          </Accordion.Content>
+        </Accordion.Item>
+      </Accordion>
     </View>
   );
 }

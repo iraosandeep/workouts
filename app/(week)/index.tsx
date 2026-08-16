@@ -12,7 +12,12 @@ import Animated from "react-native-reanimated";
 
 import { WorkoutChecklist } from "@/components/workout-checklist";
 import { WorkoutPickerSheet } from "@/components/workout-picker-sheet";
-import { formatWeekDayDate, getCurrentWeekDays, toDateKey } from "@/lib/week";
+import {
+  formatWeekDayDate,
+  getCurrentWeekDays,
+  getDayColorClassName,
+  toDateKey,
+} from "@/lib/week";
 import { getWorkout, useWorkouts } from "@/lib/workouts";
 
 export default function Week() {
@@ -37,21 +42,25 @@ export default function Week() {
           value={expandedDay}
           onValueChange={setExpandedDay}
           classNames={{
-            container: "bg-surface",
             separator: "bg-separator",
           }}
         >
-          {weekDays.map((weekDay) => {
+          {weekDays.map((weekDay, dayIndex) => {
             const dateKey = toDateKey(weekDay.date);
             const exercises = getWorkout(workouts, dateKey);
             const hasWorkout = exercises.length > 0;
+            const dayColorClassName = getDayColorClassName(dayIndex);
 
             return (
-              <Accordion.Item key={weekDay.day} value={weekDay.day}>
+              <Accordion.Item
+                key={weekDay.day}
+                value={weekDay.day}
+                className={dayColorClassName}
+              >
                 <Accordion.Trigger className="px-5 py-6">
                   <View className="flex-1 gap-1">
                     <View className="flex-row items-center gap-2">
-                      <Text className="text-5xl font-extrabold uppercase tracking-wide text-surface-foreground">
+                      <Text className="text-5xl font-extrabold uppercase tracking-wide text-foreground">
                         {weekDay.day}
                       </Text>
                       {weekDay.isToday ? (

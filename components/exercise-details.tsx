@@ -35,7 +35,7 @@ function BulletList({ items }: { items: string[] }) {
 
 export function ExerciseDetails({ exercise }: { exercise: Exercise }) {
   return (
-    <View className="gap-4 bg-surface-secondary p-4">
+    <View className="gap-4 pt-4">
       <View className="flex-row flex-wrap gap-2">
         <Chip size="sm" variant="soft" color="accent">
           {humanize(exercise.difficulty)}
