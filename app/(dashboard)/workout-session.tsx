@@ -4,12 +4,7 @@ import { Alert, BackHandler, ScrollView, Text, View } from "react-native";
 import { Button, useToast } from "heroui-native";
 
 import { WorkoutChecklist } from "@/components/workout-checklist";
-import {
-  formatWeekDayDate,
-  getCurrentWeekDays,
-  getDayColorClassName,
-  toDateKey,
-} from "@/lib/week";
+import { formatWeekDayDate, getCurrentWeekDays, toDateKey } from "@/lib/week";
 import { getWorkout, useWorkouts } from "@/lib/workouts";
 
 /** "125:00:07" / "07:32" — hours only shown once a session runs past an hour. */
@@ -34,7 +29,6 @@ export default function WorkoutSession() {
     0,
   );
   const today = weekDays[todayIndex];
-  const dayColorClassName = getDayColorClassName(todayIndex);
   const dateKey = toDateKey(today.date);
 
   const workouts = useWorkouts();
@@ -84,7 +78,7 @@ export default function WorkoutSession() {
   };
 
   return (
-    <View className={`flex-1 ${dayColorClassName}`}>
+    <View className={`flex-1 bg-background`}>
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{ padding: 16, gap: 16, flexGrow: 1 }}
