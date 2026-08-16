@@ -25,8 +25,18 @@ export function WorkoutPickerSheet({
 }: WorkoutPickerSheetProps) {
   const { toast } = useToast();
   const exercises = useMemo(() => getAllExercises(), []);
-  const { activeCategory, categories, filtered, search, setSearch } =
-    useExercise({ data: exercises });
+  const {
+    activeCategory,
+    categories,
+    filtered,
+    search,
+    setSearch,
+    bodyParts,
+    selectedBodyParts,
+    setSelectedBodyParts,
+    selectedDifficulties,
+    setSelectedDifficulties,
+  } = useExercise({ data: exercises });
 
   const workouts = useWorkouts();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -96,6 +106,11 @@ export function WorkoutPickerSheet({
                 categories={categories}
                 activeCategory={activeCategory}
                 placeholder='Search exercises… e.g. "kettlebell" or "hamstrings"'
+                bodyParts={bodyParts}
+                selectedBodyParts={selectedBodyParts}
+                onBodyPartsChange={setSelectedBodyParts}
+                selectedDifficulties={selectedDifficulties}
+                onDifficultiesChange={setSelectedDifficulties}
               />
             }
             ListEmptyComponent={

@@ -10,8 +10,18 @@ import { getAllExercises } from "@/lib/exercises";
 export default function Exercises() {
   const exercises = useMemo(() => getAllExercises(), []);
 
-  const { activeCategory, categories, filtered, search, setSearch } =
-    useExercise({ data: exercises });
+  const {
+    activeCategory,
+    categories,
+    filtered,
+    search,
+    setSearch,
+    bodyParts,
+    selectedBodyParts,
+    setSelectedBodyParts,
+    selectedDifficulties,
+    setSelectedDifficulties,
+  } = useExercise({ data: exercises });
 
   return (
     <View className="flex-1 bg-background">
@@ -33,6 +43,11 @@ export default function Exercises() {
               categories={categories}
               activeCategory={activeCategory}
               placeholder='Search exercises… e.g. "kettlebell" or "hamstrings"'
+              bodyParts={bodyParts}
+              selectedBodyParts={selectedBodyParts}
+              onBodyPartsChange={setSelectedBodyParts}
+              selectedDifficulties={selectedDifficulties}
+              onDifficultiesChange={setSelectedDifficulties}
             />
           </View>
         }

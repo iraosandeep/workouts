@@ -1,8 +1,15 @@
 import { SearchField, Tabs } from "heroui-native";
 import { View } from "react-native";
 
+import { MultiSelectFilter } from "@/components/multi-select-filter";
 import { ALL_CATEGORIES } from "@/hooks/useExercise";
-import { humanize, type ExerciseCategory } from "@/lib/exercises";
+import {
+  DIFFICULTIES,
+  humanize,
+  type BodyPart,
+  type Difficulty,
+  type ExerciseCategory,
+} from "@/lib/exercises";
 
 type ExerciseSearchHeaderProps = {
   search: string;
@@ -10,15 +17,26 @@ type ExerciseSearchHeaderProps = {
   categories: ExerciseCategory[];
   activeCategory: ExerciseCategory | undefined;
   placeholder: string;
+  bodyParts: BodyPart[];
+  selectedBodyParts: Set<BodyPart>;
+  onBodyPartsChange: (next: Set<BodyPart>) => void;
+  selectedDifficulties: Set<Difficulty>;
+  onDifficultiesChange: (next: Set<Difficulty>) => void;
 };
 
-/** Search box + category filter row shared by the Exercises directory and the workout picker. */
+/** Search box + category/muscle-group/difficulty filters shared by the Exercises
+ * directory and the workout picker. */
 export function ExerciseSearchHeader({
   search,
   onSearchChange,
   categories,
   activeCategory,
   placeholder,
+  bodyParts,
+  selectedBodyParts,
+  onBodyPartsChange,
+  selectedDifficulties,
+  onDifficultiesChange,
 }: ExerciseSearchHeaderProps) {
   return (
     <View className="gap-3 pb-2">
@@ -53,6 +71,27 @@ export function ExerciseSearchHeader({
           </Tabs.ScrollView>
         </Tabs.List>
       </Tabs>
+
+      <View className="flex-row gap-2">
+        <View className="flex-1">
+          <MultiSelectFilter
+            label="Muscle Groups"
+            options={bodyParts}
+            selected={selectedBodyParts}
+            onSelectedChange={onBodyPartsChange}
+            formatOption={humanize}
+          />
+        </View>
+        <View className="flex-1">
+          <MultiSelectFilter
+            label="Difficulty"
+            options={DIFFICULTIES}
+            selected={selectedDifficulties}
+            onSelectedChange={onDifficultiesChange}
+            formatOption={humanize}
+          />
+        </View>
+      </View>
     </View>
   );
 }
