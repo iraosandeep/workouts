@@ -1,5 +1,5 @@
 import { Button, Input, TextField } from "heroui-native";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -11,47 +11,41 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { EmptyState } from "@/components/empty-state";
-import { sendChatMessage, type ChatMessage } from "@/lib/ai";
+import { sendChatMessage } from "@/lib/ai";
+import { appendChatMessage, useChatMessages } from "@/lib/chat";
+import { createLogger } from "@/lib/logger";
 
-type ChatEntry = ChatMessage & { id: string };
+const logger = createLogger("Chat");
 
 export default function Chat() {
-  const [messages, setMessages] = useState<ChatEntry[]>([]);
+  const messages = useChatMessages();
   const [draft, setDraft] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const nextId = useRef(0);
   const insets = useSafeAreaInsets();
 
   const handleSend = async () => {
     const content = draft.trim();
     if (!content || isSending) return;
 
-    const history = [
-      ...messages,
-      { id: String(nextId.current++), role: "user" as const, content },
-    ];
-    setMessages(history);
+    const userEntry = appendChatMessage("user", content);
+    const history = [...messages, userEntry];
     setDraft("");
     setIsSending(true);
+
+    logger.log("sending message, history length:", history.length);
 
     try {
       const reply = await sendChatMessage(
         history.map(({ role, content }) => ({ role, content })),
       );
-      setMessages((current) => [
-        ...current,
-        { id: String(nextId.current++), role: "assistant", content: reply },
-      ]);
+      logger.log("got reply:", reply);
+      appendChatMessage("assistant", reply);
     } catch (error) {
-      setMessages((current) => [
-        ...current,
-        {
-          id: String(nextId.current++),
-          role: "assistant",
-          content:
-            error instanceof Error ? error.message : "Something went wrong.",
-        },
-      ]);
+      logger.error("send failed:", error);
+      appendChatMessage(
+        "assistant",
+        error instanceof Error ? error.message : "Something went wrong.",
+      );
     } finally {
       setIsSending(false);
     }

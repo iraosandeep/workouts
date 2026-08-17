@@ -1,9 +1,12 @@
+import { router } from "expo-router";
+import { SymbolView } from "expo-symbols";
+import { useThemeColor } from "heroui-native";
+import { useMemo } from "react";
+import { Pressable, ScrollView, Text, View } from "react-native";
+
 import { MonthProgress } from "@/components/month-progress";
 import { formatWeekDayDate, getCurrentWeekDays, toDateKey } from "@/lib/week";
 import { getWorkout, useWorkouts } from "@/lib/workouts";
-import { router } from "expo-router";
-import { useMemo } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
 
 export default function Home() {
   const todayKey = toDateKey(new Date());
@@ -13,6 +16,7 @@ export default function Home() {
   const today = weekDays[todayIndex] ?? weekDays[0];
   const exercises = getWorkout(workouts, today ? todayKey : "");
   const hasWorkout = exercises.length > 0;
+  const foregroundColor = useThemeColor("foreground");
   const summary = hasWorkout
     ? `${exercises.length} exercise${exercises.length === 1 ? "" : "s"}: ${exercises
         .map((exercise) => exercise.name)
@@ -23,6 +27,11 @@ export default function Home() {
     <View className="flex-1 gap-3 p-4 bg-background">
       <ScrollView contentInsetAdjustmentBehavior="automatic">
         <View className="flex gap-3">
+          <View className="flex-row justify-end">
+            <Pressable onPress={() => router.push("/profile")} hitSlop={12}>
+              <SymbolView name="person.crop.circle" tintColor={foregroundColor} size={28} />
+            </Pressable>
+          </View>
           <View className="flex-1 bg-surface p-4">
             <Pressable
               onPress={() => router.push("/today")}

@@ -1,7 +1,7 @@
 import "expo-sqlite/localStorage/install";
 import { useSyncExternalStore } from "react";
 
-import type { Exercise } from "@/lib/exercises";
+import { getExerciseById, type Exercise } from "@/lib/exercises";
 
 // v2: keyed by the richer exercises.json Exercise shape (id/difficulty/equipment/etc.),
 // not the old API-derived shape — bumped so stale on-device data isn't read back in.
@@ -61,6 +61,56 @@ export function removeExerciseFromWorkout(dateKey: string, exerciseId: string) {
  * (e.g. the chat agent's tools), where `useWorkouts()` isn't available. */
 export function getWorkoutForDate(dateKey: string): Exercise[] {
   return getWorkout(cache, dateKey);
+}
+
+/** Exports the given dates as `{ dateKey: exerciseId[] }` — just ids, so the
+ * result stays valid even if the exercises.json schema grows over time. */
+export function exportWorkoutsJson(dateKeys: string[]): string {
+  const data: Record<string, string[]> = {};
+  for (const dateKey of dateKeys) {
+    data[dateKey] = getWorkout(cache, dateKey).map((exercise) => exercise.id);
+  }
+  return JSON.stringify(data, null, 2);
+}
+
+export type ImportWorkoutsResult = {
+  importedDays: number;
+  skippedIds: string[];
+};
+
+/** Imports a `{ dateKey: exerciseId[] }` JSON blob (the shape produced by
+ * `exportWorkoutsJson`), resolving each id against the current exercise
+ * catalog. Unknown ids are skipped and reported rather than failing the
+ * whole import. */
+export function importWorkoutsJson(json: string): ImportWorkoutsResult {
+  const parsed: unknown = JSON.parse(json);
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+    throw new Error('Expected a JSON object of "dateKey": [exerciseId, ...].');
+  }
+
+  const skippedIds: string[] = [];
+  let importedDays = 0;
+
+  for (const [dateKey, exerciseIds] of Object.entries(
+    parsed as Record<string, unknown>,
+  )) {
+    if (!Array.isArray(exerciseIds)) continue;
+
+    const exercises: Exercise[] = [];
+    for (const id of exerciseIds) {
+      const exercise = typeof id === "string" ? getExerciseById(id) : undefined;
+      if (exercise) {
+        exercises.push(exercise);
+      } else {
+        skippedIds.push(String(id));
+      }
+    }
+
+    setWorkout(dateKey, exercises);
+    importedDays += 1;
+  }
+
+  return { importedDays, skippedIds };
 }
 
 export function useWorkouts() {

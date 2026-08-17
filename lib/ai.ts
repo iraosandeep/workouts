@@ -1,5 +1,8 @@
 import { AGENT_TOOLS, runAgentTool } from "@/lib/agent-tools";
+import { createLogger } from "@/lib/logger";
 import { toDateKey } from "@/lib/week";
+
+const logger = createLogger("AI");
 
 export type ChatRole = "user" | "assistant";
 
@@ -8,19 +11,32 @@ export type ChatMessage = {
   content: string;
 };
 
-const GROQ_API_KEY = process.env.EXPO_PUBLIC_GROQ_API_KEY;
-const GROQ_MODEL = "llama-3.3-70b-versatile";
-const GROQ_CHAT_URL = "https://api.groq.com/openai/v1/chat/completions";
+const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
+
+// Tried in order. If the first is under sustained "high demand" (503s that
+// don't clear up after retrying), fall back to the second rather than
+// failing the whole chat.
+const GEMINI_MODELS = ["gemini-flash-lite-latest", "gemini-flash-latest"];
+
+function urlFor(model: string) {
+  return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+}
 
 // Guards against a runaway tool-call loop if the model never settles on a
-// plain-text reply.
-const MAX_TOOL_ROUNDS = 4;
+// plain-text reply. Generous because a request like "build a plan for every
+// day this week" needs roughly a search + set call per day (14+ round trips).
+const MAX_TOOL_ROUNDS = 25;
 
-// Llama 3.3 occasionally emits a malformed "<function=...>" tool call instead
-// of a structured one; Groq rejects it with a 400 tool_use_failed error.
-// Resampling almost always produces a valid call, so retry a couple of times
-// before surfacing an error.
-const MAX_TOOL_USE_RETRIES = 2;
+// Gemini occasionally answers with a transient 503 ("high demand") or 429
+// (rate limited) — both usually clear up within a couple seconds, so retry
+// with a short backoff before falling back to the next model.
+const RETRYABLE_STATUS_CODES = new Set([429, 503]);
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1500;
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 function buildSystemPrompt(): string {
   const today = new Date();
@@ -35,95 +51,153 @@ function buildSystemPrompt(): string {
   ].join(" ");
 }
 
-type GroqToolCall = {
-  id: string;
-  type: "function";
-  function: { name: string; arguments: string };
+type FunctionCallPart = {
+  functionCall: { name: string; args: Record<string, unknown> };
 };
 
-type GroqMessage = {
-  role: "system" | "user" | "assistant" | "tool";
-  content: string | null;
-  tool_calls?: GroqToolCall[];
-  tool_call_id?: string;
+type GeminiPart =
+  { text: string } | FunctionCallPart | { functionResponse: unknown };
+
+type GeminiContent = {
+  role: "user" | "model";
+  parts: GeminiPart[];
 };
 
-async function callGroq(messages: GroqMessage[]) {
-  if (!GROQ_API_KEY) {
+function isFunctionCallPart(part: GeminiPart): part is FunctionCallPart {
+  return "functionCall" in part;
+}
+
+async function callGemini(contents: GeminiContent[]) {
+  if (!GEMINI_API_KEY) {
+    logger.error("missing EXPO_PUBLIC_GEMINI_API_KEY");
     throw new Error(
-      "Missing EXPO_PUBLIC_GROQ_API_KEY. Add it to .env.local and restart the dev server.",
+      "Missing EXPO_PUBLIC_GEMINI_API_KEY. Add it to .env.local and restart the dev server.",
     );
   }
 
-  for (let attempt = 0; attempt <= MAX_TOOL_USE_RETRIES; attempt++) {
-    const response = await fetch(GROQ_CHAT_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${GROQ_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: GROQ_MODEL,
-        messages,
-        tools: AGENT_TOOLS,
-      }),
-    });
+  const body = JSON.stringify({
+    contents,
+    systemInstruction: { parts: [{ text: buildSystemPrompt() }] },
+    tools: [{ functionDeclarations: AGENT_TOOLS }],
+  });
 
-    if (response.ok) {
-      return response.json();
-    }
+  let lastError: unknown = new Error("Gemini request failed.");
 
-    const errorText = await response.text();
-    const isRetryableToolFailure =
-      response.status === 400 && errorText.includes('"tool_use_failed"');
+  for (const model of GEMINI_MODELS) {
+    const url = urlFor(model);
 
-    if (!isRetryableToolFailure || attempt === MAX_TOOL_USE_RETRIES) {
-      throw new Error(`Groq request failed (${response.status}): ${errorText}`);
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      logger.log(
+        `POST ${url} (${contents.length} turns, attempt ${attempt + 1}/${MAX_RETRIES + 1})`,
+      );
+
+      let response: Response;
+      try {
+        response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-goog-api-key": GEMINI_API_KEY,
+          },
+          body,
+        });
+      } catch (error) {
+        lastError = error;
+        if (attempt < MAX_RETRIES) {
+          logger.warn(
+            `fetch threw before a response was received, retrying in ${RETRY_DELAY_MS}ms:`,
+            error,
+          );
+          await sleep(RETRY_DELAY_MS);
+          continue;
+        }
+        logger.warn(`${model} unreachable after retries, trying next model`);
+        break;
+      }
+
+      logger.log("response status", response.status);
+
+      if (response.ok) {
+        return response.json();
+      }
+
+      const errorText = await response.text();
+      lastError = new Error(
+        `Gemini request failed (${response.status}): ${errorText}`,
+      );
+
+      if (!RETRYABLE_STATUS_CODES.has(response.status)) {
+        logger.error("Gemini returned an error body:", errorText);
+        throw lastError;
+      }
+
+      if (attempt < MAX_RETRIES) {
+        logger.warn(
+          `Gemini returned ${response.status}, retrying in ${RETRY_DELAY_MS}ms:`,
+          errorText,
+        );
+        await sleep(RETRY_DELAY_MS);
+        continue;
+      }
+
+      logger.warn(
+        `${model} still ${response.status} after retries, trying next model`,
+      );
     }
   }
 
-  throw new Error("Groq request failed.");
+  logger.error("all models failed:", lastError);
+  throw lastError;
 }
 
-/** Sends the conversation to Groq with workout tool access. Any tool calls
- * the model makes are resolved locally against lib/workouts.ts /
+/** Sends the conversation to Gemini with workout tool access. Any function
+ * calls the model makes are resolved locally against lib/workouts.ts /
  * lib/exercises.ts and fed back until the model returns a plain reply. */
 export async function sendChatMessage(
   messages: ChatMessage[],
 ): Promise<string> {
-  const conversation: GroqMessage[] = [
-    { role: "system", content: buildSystemPrompt() },
-    ...messages,
-  ];
+  const contents: GeminiContent[] = messages.map((message) => ({
+    role: message.role === "assistant" ? "model" : "user",
+    parts: [{ text: message.content }],
+  }));
 
   for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
-    const data = await callGroq(conversation);
-    const message = data.choices?.[0]?.message;
-    if (!message) {
-      throw new Error("Groq response did not include a message.");
-    }
+    logger.log(`round ${round + 1}/${MAX_TOOL_ROUNDS}`);
+    const data = await callGemini(contents);
+    const parts: GeminiPart[] = data.candidates?.[0]?.content?.parts ?? [];
+    const functionCalls = parts.filter(isFunctionCallPart);
 
-    const toolCalls: GroqToolCall[] = message.tool_calls ?? [];
-    if (toolCalls.length === 0) {
-      if (typeof message.content !== "string") {
-        throw new Error("Groq response did not include a message.");
+    if (functionCalls.length === 0) {
+      const text = parts
+        .map((part) => ("text" in part ? part.text : ""))
+        .join("")
+        .trim();
+      if (!text) {
+        logger.error("no text and no function calls in response:", data);
+        throw new Error("Gemini response did not include a message.");
       }
-      return message.content;
+      return text;
     }
 
-    conversation.push({
-      role: "assistant",
-      content: message.content ?? null,
-      tool_calls: toolCalls,
+    logger.log(
+      "tool calls:",
+      functionCalls.map(({ functionCall }) => functionCall.name).join(", "),
+    );
+
+    contents.push({ role: "model", parts: functionCalls });
+
+    contents.push({
+      role: "user",
+      parts: functionCalls.map(({ functionCall }) => ({
+        functionResponse: {
+          name: functionCall.name,
+          response: {
+            name: functionCall.name,
+            content: runAgentTool(functionCall.name, functionCall.args),
+          },
+        },
+      })),
     });
-
-    for (const toolCall of toolCalls) {
-      conversation.push({
-        role: "tool",
-        tool_call_id: toolCall.id,
-        content: runAgentTool(toolCall.function.name, toolCall.function.arguments),
-      });
-    }
   }
 
   throw new Error("The assistant took too many steps without finishing.");

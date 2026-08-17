@@ -13,109 +13,91 @@ import {
 
 const MAX_SEARCH_RESULTS = 10;
 
-/** OpenAI/Groq-compatible tool definitions the chat agent can call to read
+/** Gemini function-declaration definitions the chat agent can call to read
  * and edit the user's workout plan. Each one maps directly onto an existing
  * lib/workouts.ts or lib/exercises.ts function — no logic lives here beyond
  * argument parsing and result shaping. */
 export const AGENT_TOOLS = [
   {
-    type: "function",
-    function: {
-      name: "search_exercises",
-      description:
-        "Search the exercise catalog by name, body part, muscle, equipment, or tag. Returns exercise ids — use this before adding any exercise to a workout, never guess an id.",
-      parameters: {
-        type: "object",
-        properties: {
-          query: {
-            type: "string",
-            description: 'Free-text search, e.g. "chest" or "kettlebell".',
-          },
+    name: "search_exercises",
+    description:
+      "Search the exercise catalog by name, body part, muscle, equipment, or tag. Returns exercise ids — use this before adding any exercise to a workout, never guess an id.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        query: {
+          type: "STRING",
+          description: 'Free-text search, e.g. "chest" or "kettlebell".',
         },
-        required: ["query"],
       },
+      required: ["query"],
     },
   },
   {
-    type: "function",
-    function: {
-      name: "get_workout",
-      description: "Get the exercises currently planned for a given date.",
-      parameters: {
-        type: "object",
-        properties: {
-          date: { type: "string", description: "Date as YYYY-MM-DD." },
-        },
-        required: ["date"],
+    name: "get_workout",
+    description: "Get the exercises currently planned for a given date.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        date: { type: "STRING", description: "Date as YYYY-MM-DD." },
       },
+      required: ["date"],
     },
   },
   {
-    type: "function",
-    function: {
-      name: "set_workout",
-      description:
-        "Create or fully replace the workout plan for a date with a specific list of exercises.",
-      parameters: {
-        type: "object",
-        properties: {
-          date: { type: "string", description: "Date as YYYY-MM-DD." },
-          exerciseIds: {
-            type: "array",
-            items: { type: "string" },
-            description: "Exercise ids returned by search_exercises.",
-          },
+    name: "set_workout",
+    description:
+      "Create or fully replace the workout plan for a date with a specific list of exercises.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        date: { type: "STRING", description: "Date as YYYY-MM-DD." },
+        exerciseIds: {
+          type: "ARRAY",
+          items: { type: "STRING" },
+          description: "Exercise ids returned by search_exercises.",
         },
-        required: ["date", "exerciseIds"],
       },
+      required: ["date", "exerciseIds"],
     },
   },
   {
-    type: "function",
-    function: {
-      name: "add_exercise_to_workout",
-      description:
-        "Add a single exercise to a date's existing plan without removing what's already there.",
-      parameters: {
-        type: "object",
-        properties: {
-          date: { type: "string", description: "Date as YYYY-MM-DD." },
-          exerciseId: {
-            type: "string",
-            description: "Exercise id returned by search_exercises.",
-          },
+    name: "add_exercise_to_workout",
+    description:
+      "Add a single exercise to a date's existing plan without removing what's already there.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        date: { type: "STRING", description: "Date as YYYY-MM-DD." },
+        exerciseId: {
+          type: "STRING",
+          description: "Exercise id returned by search_exercises.",
         },
-        required: ["date", "exerciseId"],
       },
+      required: ["date", "exerciseId"],
     },
   },
   {
-    type: "function",
-    function: {
-      name: "remove_exercise_from_workout",
-      description: "Remove a single exercise from a date's plan.",
-      parameters: {
-        type: "object",
-        properties: {
-          date: { type: "string", description: "Date as YYYY-MM-DD." },
-          exerciseId: { type: "string" },
-        },
-        required: ["date", "exerciseId"],
+    name: "remove_exercise_from_workout",
+    description: "Remove a single exercise from a date's plan.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        date: { type: "STRING", description: "Date as YYYY-MM-DD." },
+        exerciseId: { type: "STRING" },
       },
+      required: ["date", "exerciseId"],
     },
   },
   {
-    type: "function",
-    function: {
-      name: "delete_workout",
-      description: "Clear the entire workout plan for a date.",
-      parameters: {
-        type: "object",
-        properties: {
-          date: { type: "string", description: "Date as YYYY-MM-DD." },
-        },
-        required: ["date"],
+    name: "delete_workout",
+    description: "Clear the entire workout plan for a date.",
+    parameters: {
+      type: "OBJECT",
+      properties: {
+        date: { type: "STRING", description: "Date as YYYY-MM-DD." },
       },
+      required: ["date"],
     },
   },
 ] as const;
@@ -147,17 +129,11 @@ function resolveExerciseIds(exerciseIds: unknown) {
   return { found, missing };
 }
 
-/** Executes one tool call by name against the parsed JSON `arguments` string
- * a tool-calling model returns, and gives back a JSON string suitable for a
- * `tool` role message's content. */
-export function runAgentTool(name: string, rawArgs: string): string {
-  let args: Record<string, unknown>;
-  try {
-    args = rawArgs ? JSON.parse(rawArgs) : {};
-  } catch {
-    return JSON.stringify({ error: "Malformed tool arguments." });
-  }
-
+/** Executes one tool call by name against the already-parsed `args` object
+ * Gemini hands back for a functionCall, and returns a plain JSON-serializable
+ * result — the caller is responsible for wrapping it into whatever shape the
+ * model transport expects. */
+export function runAgentTool(name: string, args: Record<string, unknown>): unknown {
   const date = typeof args.date === "string" ? args.date : undefined;
 
   switch (name) {
@@ -167,59 +143,59 @@ export function runAgentTool(name: string, rawArgs: string): string {
         .filter((exercise) => matchesExerciseQuery(exercise, query))
         .slice(0, MAX_SEARCH_RESULTS)
         .map(summarize);
-      return JSON.stringify({ matches });
+      return { matches };
     }
 
     case "get_workout": {
-      if (!date) return JSON.stringify({ error: "Missing date." });
+      if (!date) return { error: "Missing date." };
       const exercises = getWorkoutForDate(date).map(summarize);
-      return JSON.stringify({ date, exercises });
+      return { date, exercises };
     }
 
     case "set_workout": {
-      if (!date) return JSON.stringify({ error: "Missing date." });
+      if (!date) return { error: "Missing date." };
       const { found, missing } = resolveExerciseIds(args.exerciseIds);
       setWorkout(date, found);
-      return JSON.stringify({
+      return {
         date,
         saved: found.map((exercise) => exercise.name),
         unknownIds: missing,
-      });
+      };
     }
 
     case "add_exercise_to_workout": {
       const exerciseId =
         typeof args.exerciseId === "string" ? args.exerciseId : undefined;
       if (!date || !exerciseId) {
-        return JSON.stringify({ error: "Missing date or exerciseId." });
+        return { error: "Missing date or exerciseId." };
       }
       const exercise = getExerciseById(exerciseId);
       if (!exercise) {
-        return JSON.stringify({
+        return {
           error: `Unknown exercise id "${exerciseId}". Call search_exercises first.`,
-        });
+        };
       }
       addExerciseToWorkout(date, exercise);
-      return JSON.stringify({ date, added: exercise.name });
+      return { date, added: exercise.name };
     }
 
     case "remove_exercise_from_workout": {
       const exerciseId =
         typeof args.exerciseId === "string" ? args.exerciseId : undefined;
       if (!date || !exerciseId) {
-        return JSON.stringify({ error: "Missing date or exerciseId." });
+        return { error: "Missing date or exerciseId." };
       }
       removeExerciseFromWorkout(date, exerciseId);
-      return JSON.stringify({ date, removed: exerciseId });
+      return { date, removed: exerciseId };
     }
 
     case "delete_workout": {
-      if (!date) return JSON.stringify({ error: "Missing date." });
+      if (!date) return { error: "Missing date." };
       setWorkout(date, []);
-      return JSON.stringify({ date, cleared: true });
+      return { date, cleared: true };
     }
 
     default:
-      return JSON.stringify({ error: `Unknown tool "${name}".` });
+      return { error: `Unknown tool "${name}".` };
   }
 }
