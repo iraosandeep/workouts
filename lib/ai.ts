@@ -1,4 +1,8 @@
-import { AGENT_TOOLS, runAgentTool } from "@/lib/agent-tools";
+import {
+  AGENT_TOOLS,
+  runAgentTool,
+  type ExerciseSummary,
+} from "@/lib/agent-tools";
 import { createLogger } from "@/lib/logger";
 import { toDateKey } from "@/lib/week";
 
@@ -10,6 +14,26 @@ export type ChatMessage = {
   role: ChatRole;
   content: string;
 };
+
+export type WorkoutCardData = {
+  dateKey: string;
+  exercises: ExerciseSummary[];
+};
+
+export type ChatReply = {
+  text: string;
+  cards: WorkoutCardData[];
+};
+
+/** Tool results shaped `{ date, exercises }` (get_workout, set_workout,
+ * add/remove_exercise_to_workout, delete_workout) double as day-card data —
+ * this is the only shape check needed to spot them. */
+function asWorkoutCard(result: unknown): WorkoutCardData | undefined {
+  if (typeof result !== "object" || result === null) return undefined;
+  const { date, exercises } = result as Record<string, unknown>;
+  if (typeof date !== "string" || !Array.isArray(exercises)) return undefined;
+  return { dateKey: date, exercises: exercises as ExerciseSummary[] };
+}
 
 const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
 
@@ -152,14 +176,18 @@ async function callGemini(contents: GeminiContent[]) {
 
 /** Sends the conversation to Gemini with workout tool access. Any function
  * calls the model makes are resolved locally against lib/workouts.ts /
- * lib/exercises.ts and fed back until the model returns a plain reply. */
+ * lib/exercises.ts and fed back until the model returns a plain reply.
+ * Along the way, any tool result shaped like a day's plan is collected into
+ * `cards` so the chat UI can render it as a workout card, not just text. */
 export async function sendChatMessage(
   messages: ChatMessage[],
-): Promise<string> {
+): Promise<ChatReply> {
   const contents: GeminiContent[] = messages.map((message) => ({
     role: message.role === "assistant" ? "model" : "user",
     parts: [{ text: message.content }],
   }));
+
+  const cardsByDate = new Map<string, WorkoutCardData>();
 
   for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
     logger.log(`round ${round + 1}/${MAX_TOOL_ROUNDS}`);
@@ -176,7 +204,10 @@ export async function sendChatMessage(
         logger.error("no text and no function calls in response:", data);
         throw new Error("Gemini response did not include a message.");
       }
-      return text;
+      const cards = [...cardsByDate.values()].sort((a, b) =>
+        a.dateKey.localeCompare(b.dateKey),
+      );
+      return { text, cards };
     }
 
     logger.log(
@@ -188,15 +219,18 @@ export async function sendChatMessage(
 
     contents.push({
       role: "user",
-      parts: functionCalls.map(({ functionCall }) => ({
-        functionResponse: {
-          name: functionCall.name,
-          response: {
+      parts: functionCalls.map(({ functionCall }) => {
+        const result = runAgentTool(functionCall.name, functionCall.args);
+        const card = asWorkoutCard(result);
+        if (card) cardsByDate.set(card.dateKey, card);
+
+        return {
+          functionResponse: {
             name: functionCall.name,
-            content: runAgentTool(functionCall.name, functionCall.args),
+            response: { name: functionCall.name, content: result },
           },
-        },
-      })),
+        };
+      }),
     });
   }
 

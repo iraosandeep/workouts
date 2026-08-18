@@ -1,7 +1,7 @@
 import "expo-sqlite/localStorage/install";
 import { useSyncExternalStore } from "react";
 
-import type { ChatRole } from "@/lib/ai";
+import type { ChatRole, WorkoutCardData } from "@/lib/ai";
 
 // v1: simple localStorage persistence — swap for a real database later
 // without touching call sites (same useSyncExternalStore shape as
@@ -12,6 +12,7 @@ export type ChatEntry = {
   id: string;
   role: ChatRole;
   content: string;
+  cards?: WorkoutCardData[];
 };
 
 type Listener = () => void;
@@ -34,11 +35,16 @@ function subscribe(onStoreChange: Listener) {
   return () => listeners.delete(onStoreChange);
 }
 
-export function appendChatMessage(role: ChatRole, content: string): ChatEntry {
+export function appendChatMessage(
+  role: ChatRole,
+  content: string,
+  cards?: WorkoutCardData[],
+): ChatEntry {
   const entry: ChatEntry = {
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     role,
     content,
+    cards,
   };
   write([...cache, entry]);
   return entry;

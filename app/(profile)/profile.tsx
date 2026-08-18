@@ -1,7 +1,7 @@
 import * as Clipboard from "expo-clipboard";
 import { Button, Input, TextField, useToast } from "heroui-native";
 import { useMemo, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Alert, ScrollView, Text, View } from "react-native";
 
 import { getCurrentWeekDays, toDateKey } from "@/lib/week";
 import {
@@ -9,6 +9,7 @@ import {
   importWorkoutsJson,
   useWorkouts,
 } from "@/lib/workouts";
+import { clearChatMessages } from "@/lib/chat";
 
 export default function Profile() {
   const { toast } = useToast();
@@ -49,6 +50,23 @@ export default function Profile() {
         description: 'Expected a JSON object of "dateKey": [exerciseId, ...].',
       });
     }
+  };
+
+  const clearChat = () => {
+    Alert.alert("Clear chat", "", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Clear",
+        style: "default",
+        onPress: () => {
+          clearChatMessages();
+          toast.show({
+            variant: "success",
+            label: "All chat messages deleted!",
+          });
+        },
+      },
+    ]);
   };
 
   return (
@@ -97,6 +115,10 @@ export default function Profile() {
           </Button>
         </View>
       </ScrollView>
+      <Button onPress={clearChat} variant="danger">
+        Clear chat
+      </Button>
+      <View className="flex-1" />
     </View>
   );
 }

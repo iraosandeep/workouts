@@ -102,7 +102,15 @@ export const AGENT_TOOLS = [
   },
 ] as const;
 
-function summarize(exercise: Exercise) {
+export type ExerciseSummary = {
+  id: string;
+  name: string;
+  category: Exercise["category"];
+  difficulty: Exercise["difficulty"];
+  body_parts: Exercise["body_parts"];
+};
+
+function summarize(exercise: Exercise): ExerciseSummary {
   return {
     id: exercise.id,
     name: exercise.name,
@@ -158,7 +166,7 @@ export function runAgentTool(name: string, args: Record<string, unknown>): unkno
       setWorkout(date, found);
       return {
         date,
-        saved: found.map((exercise) => exercise.name),
+        exercises: found.map(summarize),
         unknownIds: missing,
       };
     }
@@ -176,7 +184,11 @@ export function runAgentTool(name: string, args: Record<string, unknown>): unkno
         };
       }
       addExerciseToWorkout(date, exercise);
-      return { date, added: exercise.name };
+      return {
+        date,
+        added: exercise.name,
+        exercises: getWorkoutForDate(date).map(summarize),
+      };
     }
 
     case "remove_exercise_from_workout": {
@@ -186,13 +198,17 @@ export function runAgentTool(name: string, args: Record<string, unknown>): unkno
         return { error: "Missing date or exerciseId." };
       }
       removeExerciseFromWorkout(date, exerciseId);
-      return { date, removed: exerciseId };
+      return {
+        date,
+        removed: exerciseId,
+        exercises: getWorkoutForDate(date).map(summarize),
+      };
     }
 
     case "delete_workout": {
       if (!date) return { error: "Missing date." };
       setWorkout(date, []);
-      return { date, cleared: true };
+      return { date, cleared: true, exercises: [] };
     }
 
     default:
