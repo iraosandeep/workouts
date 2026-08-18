@@ -14,6 +14,10 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
   const backgroundColor = useThemeColor("background");
   const player = useVideoPlayer(exercise.video?.url ?? null, (player) => {
     player.loop = true;
+    // These are silent demo clips — don't steal the audio session from
+    // whatever the user is already listening to.
+    player.muted = true;
+    player.audioMixingMode = "mixWithOthers";
   });
 
   const handlePlayPause = () => {
