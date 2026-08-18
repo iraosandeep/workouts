@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { ChatMarkdown } from "@/components/chat-markdown";
 import { EmptyState } from "@/components/empty-state";
 import { sendChatMessage } from "@/lib/ai";
 import { appendChatMessage, useChatMessages } from "@/lib/chat";
@@ -76,15 +77,11 @@ export default function Chat() {
                 : "self-start bg-surface"
             }`}
           >
-            <Text
-              className={
-                item.role === "user"
-                  ? "text-background"
-                  : "text-surface-foreground"
-              }
-            >
-              {item.content}
-            </Text>
+            {item.role === "assistant" ? (
+              <ChatMarkdown content={item.content} />
+            ) : (
+              <Text className="text-background">{item.content}</Text>
+            )}
           </View>
         )}
       />
