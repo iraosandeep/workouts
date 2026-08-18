@@ -22,6 +22,12 @@ function isSameDay(a: Date, b: Date): boolean {
   );
 }
 
+/** Monday=0..Sunday=6 index for an arbitrary date — the same mapping
+ * `getDayColorClassName` expects, usable outside the current week. */
+export function getMondayIndexedWeekday(date: Date): number {
+  return (date.getDay() + 6) % 7;
+}
+
 /** Monday-to-Sunday days of the week containing `referenceDate`. */
 export function getCurrentWeekDays(
   referenceDate: Date = new Date(),

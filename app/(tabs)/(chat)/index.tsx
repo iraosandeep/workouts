@@ -11,6 +11,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { EmptyState } from "@/components/empty-state";
+import { WorkoutDayCard } from "@/components/workout-day-card";
 import { sendChatMessage } from "@/lib/ai";
 import { appendChatMessage, useChatMessages } from "@/lib/chat";
 import { createLogger } from "@/lib/logger";
@@ -39,7 +40,11 @@ export default function Chat() {
         history.map(({ role, content }) => ({ role, content })),
       );
       logger.log("got reply:", reply);
-      appendChatMessage("assistant", reply);
+      appendChatMessage(
+        "assistant",
+        reply.text,
+        reply.cards.length > 0 ? reply.cards : undefined,
+      );
     } catch (error) {
       logger.error("send failed:", error);
       appendChatMessage(
@@ -69,22 +74,32 @@ export default function Chat() {
           />
         }
         renderItem={({ item }) => (
-          <View
-            className={`max-w-[85%] px-4 py-3 ${
-              item.role === "user"
-                ? "self-end bg-foreground"
-                : "self-start bg-surface"
-            }`}
-          >
-            <Text
-              className={
+          <View className="gap-2">
+            <View
+              className={`max-w-[85%] px-4 py-3 ${
                 item.role === "user"
-                  ? "text-background"
-                  : "text-surface-foreground"
-              }
+                  ? "self-end bg-foreground"
+                  : "self-start bg-surface"
+              }`}
             >
-              {item.content}
-            </Text>
+              <Text
+                className={
+                  item.role === "user"
+                    ? "text-background"
+                    : "text-surface-foreground"
+                }
+              >
+                {item.content}
+              </Text>
+            </View>
+            {item.cards?.map((card) => (
+              <View key={card.dateKey} className="w-[90%] self-start">
+                <WorkoutDayCard
+                  dateKey={card.dateKey}
+                  exercises={card.exercises}
+                />
+              </View>
+            ))}
           </View>
         )}
       />
